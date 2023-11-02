@@ -1,0 +1,25 @@
+{
+    "status": true,
+    "msg": "Data found.",
+    "data": {
+        "series": "Legends League Cricket 2022",
+        "matchs": "5th Match",
+        "match_date": "22-Sep",
+        "match_time": "07:30 PM",
+        "venue": "Arun Jaitley Stadium, Delhi",
+        "toss": "Toss delayed due to rain",
+        "umpire": "",
+        "third_umpire": "",
+        "referee": "",
+        "man_of_match": "",
+        "match_type": "T20",
+        "team_a_id": 182,
+        "team_a": "Gujarat Giants",
+        "team_a_short": "GG",
+        "team_a_img": "http://15.206.247.12/webroot/img/teams/791386207_team.png",
+        "team_b_id": 181,
+        "team_b": "Manipal Tigers",
+        "team_b_short": "MT",
+        "team_b_img": "http://15.206.247.12/webroot/img/teams/1825551249_team.png"
+    }
+}
