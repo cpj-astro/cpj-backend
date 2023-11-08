@@ -81,8 +81,41 @@ class UserController extends Controller
         if (Auth::check()) {
             // Get the currently authenticated user
             $user = Auth::user();
-
-            // You can return the user's information as needed
+            $user->load('kundli');
+    
+            $kundli_data = json_decode($user->kundli, true);
+            $kundli_data = json_decode($kundli_data['kundli_data'], true);
+            $planetaryData = $kundli_data['output'][1];
+    
+            // Create an array to represent the 12 houses, initially filled with null values
+            $houses = array_fill(0, 12, null);
+    
+            // Iterate through planetary data and map planets to houses
+            foreach ($planetaryData as $planetName => $planetInfo) {
+                $currentSign = $planetInfo['current_sign'];
+    
+                // Map the current_sign to the corresponding house number (subtract 1 since arrays are zero-based)
+                $houseNumber = $currentSign - 1;
+    
+                // Initialize the house array if it doesn't exist
+                if (!isset($houses[$houseNumber])) {
+                    $houses[$houseNumber] = [];
+                }
+    
+                // Add the first 3 letters of the planet's name to the house's array
+                $houses[$houseNumber][] = substr($planetName, 0, 2);
+            }
+    
+            // Convert each house's array into a comma-separated string
+            foreach ($houses as $houseNumber => $houseArray) {
+                if (is_array($houseArray)) {
+                    $houses[$houseNumber] = implode(', ', $houseArray);
+                }
+            }
+    
+            // Add the updated kundli_data to the user's data
+            $user['kundli_data'] = $houses;
+    
             return response()->json([
                 'data' => $user,
                 'success' => true
@@ -93,7 +126,7 @@ class UserController extends Controller
                 'message' => 'User is not authenticated',
             ], 401);
         }
-    }
+    }   
 
     /**
      * Store a newly created resource in storage.

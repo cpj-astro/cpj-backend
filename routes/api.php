@@ -19,15 +19,21 @@ Route::group(['prefix' => 'v1/admin'], function(){
 
     // admin endpoints
     Route::middleware(['auth:sanctum', 'admin.auth.token'])->group(function () {
+        // Match Related Routes
         Route::post('addMatch', 'Admin\AdminController@addMatch')->name('addMatch');
         Route::post('updateMatch', 'Admin\AdminController@updateMatch')->name('updateMatch');
         Route::post('updateSeries', 'Admin\AdminController@updateSeries')->name('updateSeries');
+        Route::get('seriesList', 'Admin\MatchController@seriesList');
+        Route::get('upcomingMatches', 'Admin\MatchController@upcomingList');
+        Route::get('recentMatches', 'Admin\MatchController@recentList');
+        Route::get('liveMatches', 'Admin\MatchController@liveList');
+        Route::post('matchInfo', 'Admin\MatchController@matchInfo')->name('matchInfo');
         Route::post('cupRates', 'Admin\AdminController@updateCupRates')->name('updateCupRates');
         Route::get('getAllCupRates', 'Admin\AdminController@getAllCupRates')->name('getAllCupRates');
         Route::get('getAllSettings', 'Admin\AdminController@getAllSettings')->name('getAllSettings');
         Route::post('updateSettings', 'Admin\AdminController@updateSettings')->name('updateSettings');
         Route::post('sendNotification', 'Admin\AdminController@sendNotification')->name('sendNotification');
-
+        
         // Private ads routes
         Route::get('getAllPrivateAds/{user_id}', 'Admin\PrivateAdsController@getList')->name('getAllPrivateAds');
         Route::get('privateAd/{id}', 'Admin\PrivateAdsController@getAd')->name('getAd');
@@ -41,16 +47,11 @@ Route::group(['prefix' => 'v1/admin'], function(){
         Route::get('getPlayer/{id}', 'Admin\PlayersController@getPlayer');
         Route::delete('deletePlayer/{id}', 'Admin\PlayersController@deletePlayer');
 
-        // Matchs routes
-        Route::get('seriesList', 'Admin\MatchController@seriesList');
-        Route::get('upcomingMatches', 'Admin\MatchController@upcomingList');
-        Route::get('recentMatches', 'Admin\MatchController@recentList');
-        Route::get('liveMatches', 'Admin\MatchController@liveList');
-        Route::post('matchInfo', 'Admin\MatchController@matchInfo')->name('matchInfo');
-
         // Kundli routes
-        Route::post('saveKundli', 'Admin\KundliController@saveKundli');
         
+        // Astrology routes
+        Route::post('uploadAstrology', 'Admin\AstrologyController@uploadAstrology');
+
         //Pandit routes
         Route::prefix('pandits')->group(function () {
             Route::post('create', 'Admin\PanditController@create'); 
