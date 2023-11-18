@@ -35,6 +35,7 @@ class AuthController extends Controller
             $user = auth()->user();
             
             $token = $user->createToken('client_token', ['client-access'], config('session.lifetime'));
+            // ->plainTextToken; try later with this token method
             return response(['status' => true, 'message' => 'Login successful', 'user' => $user, 'token' => $token]);
         }
 

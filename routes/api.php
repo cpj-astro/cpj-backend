@@ -50,8 +50,11 @@ Route::group(['prefix' => 'v1/admin'], function(){
         // Kundli routes
         
         // Astrology routes
+        Route::get('fetchUniqueYearsAndMonths', 'Admin\AstrologyController@fetchUniqueYearsAndMonths');
         Route::post('uploadAstrology', 'Admin\AstrologyController@uploadAstrology');
-
+        Route::post('uploadEditedAstrology', 'Admin\AstrologyController@uploadEditedAstrology');
+        Route::post('fetchDataByYearMonthAndPanditId', 'Admin\AstrologyController@fetchDataByYearMonthAndPanditId');
+        
         //Pandit routes
         Route::prefix('pandits')->group(function () {
             Route::post('create', 'Admin\PanditController@create'); 
@@ -97,7 +100,13 @@ Route::group(['prefix' => 'v1/cricketpanditji'], function(){
         Route::get('/test', function () {
             return response('Test API', 200)->header('Content-Type', 'application/json');
         });
+        
+        // Payment routes
+        Route::post('razorpay/create-order', 'PaymentController@createOrder');
+        Route::post('razorpay/capture-payment', 'PaymentController@capturePayment');
+        Route::post('webhook/razorpay', 'PaymentController@handleWebhook');
     });
+
     Route::get('/test', function () {
         return response('Test API', 200)->header('Content-Type', 'application/json');
     });

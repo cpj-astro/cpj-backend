@@ -99,4 +99,87 @@ class AstrologyController extends Controller
         }
     }
 
+    public function uploadEditedAstrology(Request $request)
+    {
+        try {
+            $data = $request->input('astrology_data'); // Excel data
+            $panditId = $request->input('pandit_id');
+            
+            // Get the current year and month
+            $currentYear = Carbon::now()->year;
+            $currentMonth = Carbon::now()->month;
+
+            // Check if records with the same panditId exist for the current month and year
+            AstrologyData::where('pandit_id', $panditId)
+            ->whereYear('date', $currentYear)
+            ->whereMonth('date', $currentMonth)
+            ->delete();
+
+            foreach ($data as $row) {
+                // Insert the data into the database
+                AstrologyData::create([
+                    'pandit_id' => $panditId,
+                    'date' => $row['date'],
+                    'aries' => $row['aries'],
+                    'taurus' => $row['taurus'],
+                    'gemini' => $row['gemini'],
+                    'leo' => $row['leo'],
+                    'virgo' => $row['virgo'],
+                    'libra' => $row['libra'],
+                    'scorpio' => $row['scorpio'],
+                    'sagittarius' => $row['sagittarius'],
+                    'capricorn' => $row['capricorn'],
+                    'aquarius' => $row['aquarius'],
+                    'pisces' => $row['pisces']
+                ]);
+            }
+
+            // Return a success response if the data was processed successfully
+            return response(['message' => 'Data uploaded successfully', 'status' => true], 200);
+        } catch (\Exception $e) {
+            // Handle any errors that occur during data processing
+            return response(['error' => $e->getMessage(), 'status' => false], 500);
+        }
+    }
+
+    public function fetchUniqueYearsAndMonths()
+    {
+        try {
+            $uniqueDates = AstrologyData::select(DB::raw('YEAR(date) as year'), DB::raw('MONTH(date) as month'))
+                ->distinct()
+                ->get();
+
+            // Extract years and months from the result
+            $years = $uniqueDates->pluck('year');
+            $months = $uniqueDates->pluck('month');
+
+            return response(['years' => $years, 'months' => $months, 'status' => true], 200);
+        } catch (\Exception $e) {
+            return response(['error' => $e->getMessage(), 'status' => false], 200);
+        }
+    }
+
+    public function fetchDataByYearMonthAndPanditId(Request $request)
+    {
+        try {
+            $year = $request->input('year');
+            $month = $request->input('month');
+            $panditId = $request->input('pandit_id');
+
+            $pandit = Pandits::select('name')
+            ->where('id', $panditId)
+            ->get();
+
+            $data = AstrologyData::select('date', 'aries', 'taurus', 'gemini', 'leo', 'virgo', 'libra', 'scorpio', 'sagittarius', 'capricorn', 'aquarius', 'pisces')
+            ->whereYear('date', $year)
+            ->whereMonth('date', $month)
+            ->where('pandit_id', $panditId)
+            ->get();
+
+            return response(['data' => $data, 'pandit' =>  $pandit &&  $pandit[0] ? $pandit[0]->name : 'No Pandit Selected', 'status' => true], 200);
+        } catch (\Exception $e) {
+            return response(['error' => $e->getMessage(), 'status' => false], 200);
+        }
+    }
+
 }
