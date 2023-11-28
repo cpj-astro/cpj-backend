@@ -12,6 +12,6 @@ class Kundli extends Model
     protected $table = "kundli"; 
 
     protected $fillable = [
-        'user_id','player_id','kundli_data'
+        'user_id','player_id','match_id','kundli_data'
     ];
 }

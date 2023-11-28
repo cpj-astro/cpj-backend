@@ -15,6 +15,33 @@ class AstrologyController extends Controller
 {
     use CommonTraits;
 
+    public function uploadMatchAstrology(Request $request)
+    {
+        try {
+            $payload = $request->all();
+            $panditId = $payload['pandit_id'];
+            $matchId = $payload['match_id'];
+            $astrologyData = $payload['astrology_data'][0]; // Assuming there is only one record in astrology_data
+    
+            // Convert keys to lowercase, remove white spaces, and trim values
+            $astrologyData = array_map(function ($value, $key) {
+                return [str_replace(' ', '', strtolower($key)) => is_string($value) ? trim($value) : $value];
+            }, $astrologyData, array_keys($astrologyData));
+    
+            $flattenedAstrologyData = array_merge(...$astrologyData);
+    
+            // Find or create a record based on pandit_id and match_id
+            AstrologyData::updateOrCreate(
+                ['pandit_id' => $panditId, 'match_id' => $matchId],
+                $flattenedAstrologyData
+            );
+    
+            return response(['message' => 'Data uploaded successfully', 'status' => true, 'data' => $astrologyData], 200);
+        } catch (\Exception $e) {
+            return response(['error' => $e->getMessage(), 'status' => false], 500);
+        }
+    }      
+
     public function uploadAstrology(Request $request)
     {
         try {
@@ -76,6 +103,7 @@ class AstrologyController extends Controller
                         'aries' => $formattedData['aries'],
                         'taurus' => $formattedData['taurus'],
                         'gemini' => $formattedData['gemini'],
+                        'cancer' => $formattedData['cancer'],
                         'leo' => $formattedData['leo'],
                         'virgo' => $formattedData['virgo'],
                         'libra' => $formattedData['libra'],
@@ -123,6 +151,7 @@ class AstrologyController extends Controller
                     'aries' => $row['aries'],
                     'taurus' => $row['taurus'],
                     'gemini' => $row['gemini'],
+                    'cancer' => $row['cancer'],
                     'leo' => $row['leo'],
                     'virgo' => $row['virgo'],
                     'libra' => $row['libra'],
@@ -159,6 +188,25 @@ class AstrologyController extends Controller
         }
     }
 
+    public function fetchByPanditAndMatch(Request $request)
+    {
+        try {
+            $panditId = $request->input('pandit_id');
+            $matchId = $request->input('match_id');
+
+            // Assuming you have a model named Astrology
+            $astrologyData = AstrologyData::where('pandit_id', $panditId)
+            ->where('match_id', $matchId)
+            ->get();
+
+            return response()->json(['status' => true, 'astrology_data' => $astrologyData]);
+        } catch (\Exception $e) {
+            // Log the error for debugging
+            \Log::error($e);
+            return response()->json(['status' => false, 'error' => 'Internal Server Error'], 200);
+        }
+    }
+
     public function fetchDataByYearMonthAndPanditId(Request $request)
     {
         try {
@@ -170,7 +218,7 @@ class AstrologyController extends Controller
             ->where('id', $panditId)
             ->get();
 
-            $data = AstrologyData::select('date', 'aries', 'taurus', 'gemini', 'leo', 'virgo', 'libra', 'scorpio', 'sagittarius', 'capricorn', 'aquarius', 'pisces')
+            $data = AstrologyData::select('date', 'aries', 'taurus', 'gemini', 'cancer', 'leo', 'virgo', 'libra', 'scorpio', 'sagittarius', 'capricorn', 'aquarius', 'pisces')
             ->whereYear('date', $year)
             ->whereMonth('date', $month)
             ->where('pandit_id', $panditId)

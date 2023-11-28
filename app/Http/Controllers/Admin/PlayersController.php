@@ -40,8 +40,9 @@ class PlayersController extends Controller
                         $houses[$houseNumber] = [];
                     }
     
-                    // Add the planet's name to the house's array
-                    $houses[$houseNumber][] = $planetName;
+                    
+                    // Add the first 3 letters of the planet's name to the house's array
+                    $houses[$houseNumber][] = substr($planetName, 0, 2);
                 }
                 $player['kundli_data'] = $houses;
             }
@@ -191,8 +192,6 @@ class PlayersController extends Controller
                        $error_msg = curl_error($curl); 
                        Log::info($error_msg);
                     } 
-                    
-                    Log::info($response);
         
                     curl_close($curl);
 

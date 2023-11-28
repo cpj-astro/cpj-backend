@@ -27,6 +27,7 @@ Route::group(['prefix' => 'v1/admin'], function(){
         Route::get('upcomingMatches', 'Admin\MatchController@upcomingList');
         Route::get('recentMatches', 'Admin\MatchController@recentList');
         Route::get('liveMatches', 'Admin\MatchController@liveList');
+        Route::post('saveMatchKundli', 'Admin\MatchController@saveMatchKundli')->name('saveMatchKundli');
         Route::post('matchInfo', 'Admin\MatchController@matchInfo')->name('matchInfo');
         Route::post('cupRates', 'Admin\AdminController@updateCupRates')->name('updateCupRates');
         Route::get('getAllCupRates', 'Admin\AdminController@getAllCupRates')->name('getAllCupRates');
@@ -53,7 +54,8 @@ Route::group(['prefix' => 'v1/admin'], function(){
         Route::get('fetchUniqueYearsAndMonths', 'Admin\AstrologyController@fetchUniqueYearsAndMonths');
         Route::post('uploadAstrology', 'Admin\AstrologyController@uploadAstrology');
         Route::post('uploadEditedAstrology', 'Admin\AstrologyController@uploadEditedAstrology');
-        Route::post('fetchDataByYearMonthAndPanditId', 'Admin\AstrologyController@fetchDataByYearMonthAndPanditId');
+        Route::post('uploadMatchAstrology', 'Admin\AstrologyController@uploadMatchAstrology');
+        Route::get('fetchByPanditAndMatch', 'Admin\AstrologyController@fetchByPanditAndMatch');
         
         //Pandit routes
         Route::prefix('pandits')->group(function () {
@@ -75,7 +77,9 @@ Route::group(['prefix' => 'v1/cricketpanditji'], function(){
     // Before login endpoint (open endpoints)
     Route::post('sign-in', 'AuthController@signIn')->name('signIn');
     Route::post('sign-up', 'AuthController@signUp')->name('signUp');
-
+    Route::post('forget-password', 'AuthController@sendFPLink')->name('sendFPLink');
+    Route::post('reset-password', 'AuthController@resetPassword')->name('resetPassword');
+    
     // After login endpoints
     Route::middleware(['auth:sanctum'])->group(function () {
         Route::get('user', 'UserController@getUser');

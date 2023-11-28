@@ -20,48 +20,66 @@ class UserController extends Controller
      */
     public function index()
     {
-        try{
+        try {
             $data = User::with('kundli')->where('user_type', 1)->get();
+
             foreach ($data as $user) {
                 $kundli_data = json_decode($user->kundli, true);
-                $kundli_data = json_decode($kundli_data['kundli_data'], true);
-                $planetaryData = $kundli_data['output'][1];
-    
-                // Create an array to represent the 12 houses, initially filled with null values
-                $houses = array_fill(0, 12, null);
-    
-                // Iterate through planetary data and map planets to houses
-                foreach ($planetaryData as $planetName => $planetInfo) {
-                    $currentSign = $planetInfo['current_sign'];
-    
-                    // Map the current_sign to the corresponding house number (subtract 1 since arrays are zero-based)
-                    $houseNumber = $currentSign - 1;
-    
-                    // Initialize the house array if it doesn't exist
-                    if (!isset($houses[$houseNumber])) {
-                        $houses[$houseNumber] = [];
+
+                if (isset($kundli_data['kundli_data'])) {
+                    $kundli_data = json_decode($kundli_data['kundli_data'], true);
+
+                    if (isset($kundli_data['output'][1])) {
+                        $planetaryData = $kundli_data['output'][1];
+
+                        // Create an array to represent the 12 houses, initially filled with null values
+                        $houses = array_fill(0, 12, null);
+
+                        // Iterate through planetary data and map planets to houses
+                        foreach ($planetaryData as $planetName => $planetInfo) {
+                            // Check if the required keys exist before accessing them
+                            if (isset($planetInfo['current_sign'])) {
+                                $currentSign = $planetInfo['current_sign'];
+
+                                // Map the current_sign to the corresponding house number (subtract 1 since arrays are zero-based)
+                                $houseNumber = $currentSign - 1;
+
+                                // Initialize the house array if it doesn't exist
+                                if (!isset($houses[$houseNumber])) {
+                                    $houses[$houseNumber] = [];
+                                }
+                                
+                                // Add the first 3 letters of the planet's name to the house's array
+                                $houses[$houseNumber][] = substr($planetName, 0, 2);
+                                if(substr($planetName, 0, 2) == 'Mo') {
+                                    $user['moon_sign'] = $currentSign;
+                                }
+                            }
+                        }
+
+                        $user['kundli_data'] = $houses;
+                    } else {
+                        $user['kundli_data'] = [];
                     }
-    
-                    // Add the planet's name to the house's array
-                    $houses[$houseNumber][] = $planetName;
+                } else {
+                    $user['kundli_data'] = [];
                 }
-                $user['kundli_data'] = $houses;
             }
-            
-            if (isset($data) && !empty($data)) {
+
+            if (!empty($data)) {
                 return response()->json([
                     'data' => $data,
                     'success' => true,
                     'msg' => 'Data found'
                 ], 200);
             }
+
             return response()->json([
                 'data' => [],
                 'success' => false,
                 'msg' => 'No data found'
             ], 200);
         } catch (\Throwable $th) {
-            //throw $th;
             $this->captureExceptionLog($th);
             return response()->json([
                 'data' => [],
@@ -82,14 +100,31 @@ class UserController extends Controller
             // Get the currently authenticated user
             $user = Auth::user();
             $user->load('kundli');
-    
+                
+            // Now $user contains the user details along with the associated kundli details
+
+            $userId = $user->id;
+
+            $userPaymentDetails = User::select('payments.*','matches.*','pandits.*', 'match_astrology.*')
+                ->leftJoin('payments', 'users.id', '=', 'payments.user_id') // Use the correct table alias here
+                ->leftJoin('matches', 'payments.match_id', '=', 'matches.match_id')
+                ->leftJoin('pandits', 'payments.pandit_id', '=', 'pandits.id')
+                ->leftJoin('match_astrology', 'payments.match_id', '=', 'match_astrology.match_id')
+                ->where('users.id', $userId)
+                ->get();
+
             $kundli_data = json_decode($user->kundli, true);
             $kundli_data = json_decode($kundli_data['kundli_data'], true);
             $planetaryData = $kundli_data['output'][1];
     
             // Create an array to represent the 12 houses, initially filled with null values
             $houses = array_fill(0, 12, null);
-    
+            $housesDesc = array_fill(0, 12, null);
+            
+            $houseSigns = [
+                'Aries', 'Taurus', 'Gemini', 'Cancer', 'Leo', 'Virgo', 'Libra', 'Scorpio', 'Sagittarius', 'Capricorn', 'Aquarius', 'Pisces'
+            ];
+
             // Iterate through planetary data and map planets to houses
             foreach ($planetaryData as $planetName => $planetInfo) {
                 $currentSign = $planetInfo['current_sign'];
@@ -101,9 +136,18 @@ class UserController extends Controller
                 if (!isset($houses[$houseNumber])) {
                     $houses[$houseNumber] = [];
                 }
-    
+
+                if (!isset($housesDesc[$houseNumber])) {
+                    $housesDesc[$houseNumber] = [];
+                }
+
+                $housesDesc[$houseNumber][] = $planetName;
                 // Add the first 3 letters of the planet's name to the house's array
                 $houses[$houseNumber][] = substr($planetName, 0, 2);
+                if(substr($planetName, 0, 2) == 'Mo') {
+                    $user['moon_sign'] = $currentSign;
+                    $user['sign_name'] = $houseSigns[$currentSign - 1];
+                }
             }
     
             // Convert each house's array into a comma-separated string
@@ -113,11 +157,32 @@ class UserController extends Controller
                 }
             }
     
-            // Add the updated kundli_data to the user's data
+            // Iterate through houses and create descriptions
+            $kundli_description = [];
+
+            foreach ($housesDesc as $houseNumber => $planetInfo) {
+                $houseNumber++; // Increment by 1 to match house numbering
+            
+                if ($planetInfo === null) {
+                    $kundli_description[] = "In {$houseNumber} house there are no planets";
+                } else {
+                    if (is_array($planetInfo)) {
+                        $planets = implode(' and ', array_filter($planetInfo, 'is_string'));
+                        $planetCount = count(array_filter($planetInfo, 'is_string'));
+                        $kundli_description[] = "In {$houseNumber} house there " . ($planetCount > 1 ? 'are ' : 'is ') . $planets;
+                    } else {
+                        $kundli_description[] = "In {$houseNumber} house there is {$planetInfo}";
+                    }
+                }
+            }
+
+            // Add the updated kundli_data and description to the user's data
             $user['kundli_data'] = $houses;
+            $user['house_details'] = $kundli_description;
     
             return response()->json([
                 'data' => $user,
+                'payment_details' => $userPaymentDetails,
                 'success' => true
             ]);
         } else {

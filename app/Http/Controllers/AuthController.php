@@ -6,42 +6,40 @@ use App\Models\PrivateAds;
 use App\Models\Setting;
 use App\Models\User;
 use App\Models\Kundli;
+use App\Models\PasswordReset;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
-use Illuminate\Validation\Rules\Password;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Hash;
 use App\Traits\CommonTraits;
 use Carbon\Carbon;
+use Illuminate\Support\Facades\Password;
+use Illuminate\Support\Str;
+use Mail; 
+use DB; 
 
 class AuthController extends Controller
 {
     use CommonTraits;
     public function signIn(Request $request)
     {
-        // Validate the incoming request data
-        $validator = Validator::make($request->all(), [
-            'email' => 'required|string|email|max:255',
-            'password' => 'required|string|min:6',
-        ]);
-
-        if ($validator->fails()) {
-            return response(['error' => $validator->errors()], 422);
+        try {
+            // Attempt to log in the user
+            if (auth()->attempt(['email' => $request->email, 'password' => $request->password, 'status' => 1, 'user_type' => 1])) {
+                $user = auth()->user();
+                $token = $user->createToken('client_token', ['client-access'], config('session.lifetime'));
+                // ->plainTextToken; try later with this token method
+                return response(['status' => true, 'message' => 'Login successful', 'user' => $user, 'token' => $token]);
+            } else {
+                return response(['status' => false, 'message' => 'Invalid credentials'], 200);
+            }
+        } catch (\Throwable $th) {
+            // If authentication fails, return an error response
+            return response(['status' => false, 'message' => 'Invalid credentials'], 200);
         }
-
-        // Attempt to log in the user
-        if (auth()->attempt(['email' => $request->email, 'password' => $request->password, 'status' => 1, 'user_type' => 1])) {
-            $user = auth()->user();
-            
-            $token = $user->createToken('client_token', ['client-access'], config('session.lifetime'));
-            // ->plainTextToken; try later with this token method
-            return response(['status' => true, 'message' => 'Login successful', 'user' => $user, 'token' => $token]);
-        }
-
-        // If authentication fails, return an error response
-        return response(['error' => 'Invalid credentials'], 401);
     }
+
 
     public function signUp(Request $request)
     {
@@ -147,6 +145,67 @@ class AuthController extends Controller
         }
     }
     
+    public function sendFPLink(Request $request) {
+        try {
+            $token = Str::random(64);
+            
+            $verificationLink = env('EMAIL_URL') . 'reset-password/' . $token;
+
+            Mail::send('emails.forgetPassword', ['verificationLink' => $verificationLink], function($message) use($request) {
+                $message->from('cricketpanditji.astro@gmail.com', 'CricketPanditJi'); 
+                $message->to($request->email);
+                $message->subject('Reset Password');
+            });
+
+            DB::table('password_resets')
+            ->updateOrInsert(
+                ['email' => $request->email],
+                [
+                    'token' => $token,
+                    'created_at' => now(),
+                ]
+            );
+
+            return response()->json(['status' => true, 'message' => 'We have e-mailed your password reset link!'], 200);
+        } catch (\Throwable $th) {
+            $this->captureExceptionLog($th);
+            return response()->json([
+                'data' => [],
+                'success' => false,
+                'msg' => $th->getMessage()
+            ], 200);
+        }
+    }
+
+    public function resetPassword(Request $request) {
+        try {
+            $updatePassword = DB::table('password_resets')->where([
+              'token' => $request->token
+            ])->first();
+
+            if(!$updatePassword){
+                return response()->json(['status' => false, 'message' => 'Invalid Token.'], 200);
+            }
+
+            $user = DB::table('password_resets')->where(['token' => $request->token])->first();
+            
+            if($user) {
+                User::where('email', $user->email)->update(['password' => Hash::make($request->new_password)]);
+            }
+
+            DB::table('password_resets')->where(['token'=> $request->token])->delete();
+
+            return response()->json(['status' => true, 'message' => 'Password changed successfully, Please try to Sign In.'], 200);
+        } catch (\Throwable $th) {
+            $this->captureExceptionLog($th);
+            return response()->json([
+                'data' => [],
+                'status' => false,
+                'message' => $th->getMessage()
+            ], 200);
+        }
+    }
+
     public function me(Request $request)
     {
         $token = auth()->user()->currentAccessToken();

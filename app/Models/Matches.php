@@ -5,6 +5,7 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use App\Models\Series;
+use App\Models\MatchAstrology;
 
 class Matches extends Model
 {
@@ -93,6 +94,9 @@ class Matches extends Model
         // return $this->hasOne(Series::class, 'series_id', 'id')->where('user_id', auth()->user()->id);
     }
 
+    public function astrology() {
+        return $this->hasOne(MatchAstrology::class, 'match_id', 'match_id');
+    }
     // public function getTeamAOverAttribute($value)
     // {
     //     return (isset($value) && !empty($value)) ? $value + 0 : $value;

@@ -5,22 +5,18 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
-class Payment extends Model
+class MatchAstrology extends Model
 {
     use HasFactory;
-    protected $table = "payments";
+
+    protected $table = "match_astrology";
 
     protected $fillable = [
         'id',
         'user_id',
         'match_id',
-        'pandit_id',
-        'razorpay_order_id',
-        'razorpay_payment_id',
-        'razorpay_signature',
-        'amount',
-        'status',
+        'astrology_data',
         'created_at',
-        'updated_at',
+        'updated_at'
     ];
 }
