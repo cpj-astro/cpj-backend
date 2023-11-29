@@ -89,6 +89,7 @@ Route::group(['prefix' => 'v1/cricketpanditji'], function(){
         Route::get('upcomingMatches', 'MatchController@getUpcomingList')->name('upcomingMatches');
         Route::get('recentMatches', 'MatchController@getRecentList')->name('recentMatches');
         Route::get('liveMatches', 'MatchController@getLiveList')->name('liveMatches');
+        Route::get('allMatches', 'MatchController@allMatches')->name('allMatches');
         Route::get('dashboardMatches', 'MatchController@dashboardList')->name('dashboardMatches');
         Route::post('matchesBySeriesId', 'MatchController@getList');
         Route::post('scorecardByMatchId', 'MatchController@scorecard')->name('scorecard');
