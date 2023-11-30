@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\PersonalAccessToken;
 use App\Models\User;
+use App\Models\Payment;
 use App\Models\UserApiRequest;
 use Illuminate\Http\Request;
 use App\Traits\CommonTraits;
@@ -105,13 +106,7 @@ class UserController extends Controller
 
             $userId = $user->id;
 
-            $userPaymentDetails = User::select('payments.*','matches.*','pandits.*', 'match_astrology.*')
-                ->leftJoin('payments', 'users.id', '=', 'payments.user_id') // Use the correct table alias here
-                ->leftJoin('matches', 'payments.match_id', '=', 'matches.match_id')
-                ->leftJoin('pandits', 'payments.pandit_id', '=', 'pandits.id')
-                ->leftJoin('match_astrology', 'payments.match_id', '=', 'match_astrology.match_id')
-                ->where('users.id', $userId)
-                ->get();
+            $userPaymentDetails = Payment::with('user', 'match', 'pandit')->where('user_id', $userId)->get();
 
             $kundli_data = json_decode($user->kundli, true);
             $kundli_data = json_decode($kundli_data['kundli_data'], true);

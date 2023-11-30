@@ -23,4 +23,16 @@ class Payment extends Model
         'created_at',
         'updated_at',
     ];
+
+    public function user() {
+        return $this->hasOne(User::class, 'id', 'user_id');
+    }
+
+    public function match() {
+        return $this->hasOne(Matches::class, 'match_id', 'match_id');
+    }
+
+    public function pandit() {
+        return $this->hasOne(Pandits::class, 'id', 'pandit_id');
+    }
 }
