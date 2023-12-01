@@ -106,6 +106,8 @@ Route::group(['prefix' => 'v1/cricketpanditji'], function(){
             return response('Test API', 200)->header('Content-Type', 'application/json');
         });
         
+        Route::post('sendMessage', 'ContactController@sendMessage');
+        
         // Payment routes
         Route::post('razorpay/create-order', 'PaymentController@createOrder');
         Route::post('razorpay/capture-payment', 'PaymentController@capturePayment');
