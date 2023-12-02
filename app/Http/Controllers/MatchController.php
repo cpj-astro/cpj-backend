@@ -438,18 +438,11 @@ class MatchController extends Controller
                 })
                 ->leftJoin('series as s', 's.series_id', '=', 'matches.series_id')
                 ->where('matches.match_id', $match_id)->where('matches.status', 1)->first();
-                if (isset($matchesData) && !empty($matchesData)) {
-                    $matchesData->bolwer = $matchesData->bowler;
-                    return response()->json([
-                        'data' => $matchesData,
-                        'success' => true,
-                        'msg' => 'Data found'
-                    ], 200);
-                }
+                
                 return response()->json([
-                    'data' => [],
-                    'success' => false,
-                    'msg' => 'No data found'
+                    'data' => $matchesData,
+                    'success' => true,
+                    'msg' => 'Data found'
                 ], 200);
             } else {
                 return response()->json([
@@ -467,11 +460,11 @@ class MatchController extends Controller
             ], 200);
         }
     }
-
-    public function allMatches(){
-        try {
-            $userId = auth()->id(); // Assuming you are using Laravel's built-in authentication
     
+    public function allMatches(Request $request){
+        try {
+            $userId = $request->get('user_id');
+
             $matchesData = Matches::select(
                 'matches.series_id',
                 's.series_name',
@@ -485,23 +478,48 @@ class MatchController extends Controller
                 'min_rate',
                 'max_rate',
                 'fav_team',
-                's_ovr',
-                's_min',
-                's_max',
-                'session',
                 'team_a_id',
                 'team_a',
                 'team_a_short',
-                'team_a_score',
-                'team_a_over',
                 'team_a_img',
+                'team_a_score',
+                'team_a_scores',
+                'team_a_over',
                 'team_b_id',
                 'team_b',
                 'team_b_short',
-                'team_b_score',
-                'team_b_over',
                 'team_b_img',
+                'team_b_score',
+                'team_b_scores',
+                'team_b_over',
+                'matches.toss',
+                'back1',
+                'back2',
+                'back3',
+                'lay1',
+                'lay2',
+                'lay3',
+                'batsman',
+                'bowler',
+                'curr_rate',
+                'first_circle',
+                'fancy',
+                'last4overs',
+                'lastwicket',
+                'match_over',
+                'partnership',
+                'rr_rate',
+                'second_circle',
+                'target',
+                'team_a_scores_over',
+                'team_b_scores_over',
+                'yet_to_bat',
                 'match_category',
+                'fancy_info',
+                'pitch_report',
+                'weather',
+                'session',
+                'result',
                 DB::raw("STR_TO_DATE(date_wise, '%d %b %Y, %W') as formatted_date_wise"),
                 DB::raw("CONCAT(STR_TO_DATE(date_wise,'%d %b %Y, %W'),' ',STR_TO_DATE(match_time, '%h:%i %p')) as formatted_date_time_wise"),
                 'payments.id as payment_id',
@@ -511,17 +529,22 @@ class MatchController extends Controller
                 'payments.amount as payment_amount',
                 'payments.status as payment_status',
                 'payments.created_at as payment_created',
-                'payments.updated_at as payment_updated'
+                'payments.updated_at as payment_updated',
+                'astrology_data'
             )
-                ->leftJoin('payments', function($join) use ($userId) {
-                    $join->on('matches.match_id', '=', 'payments.match_id')
-                        ->where('payments.user_id', '=', $userId);
-                })
-                ->join('series as s', 's.series_id', '=', 'matches.series_id')
-                ->whereIn('match_category',  ['live', 'upcoming'])
-                ->orderBy('formatted_date_time_wise', 'asc')
-                ->get();
-    
+            ->leftJoin('payments', function($join) use ($userId) {
+                $join->on('matches.match_id', '=', 'payments.match_id')
+                    ->where('payments.user_id', '=', $userId);
+            })
+            ->leftJoin('match_astrology', function($join) use ($userId) {
+                $join->on('matches.match_id', '=', 'match_astrology.match_id')
+                    ->where('match_astrology.user_id', '=', $userId);
+            })
+            ->leftJoin('series as s', 's.series_id', '=', 'matches.series_id')
+            ->whereIn('match_category',  ['live', 'upcoming'])
+            ->orderBy('formatted_date_time_wise', 'asc')
+            ->get();
+            
             if (isset($matchesData) && !empty($matchesData) && count($matchesData) > 0) {
                 return response()->json([
                     'data' => $matchesData,

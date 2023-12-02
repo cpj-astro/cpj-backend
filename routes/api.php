@@ -79,17 +79,17 @@ Route::group(['prefix' => 'v1/cricketpanditji'], function(){
     Route::post('sign-up', 'AuthController@signUp')->name('signUp');
     Route::post('forget-password', 'AuthController@sendFPLink')->name('sendFPLink');
     Route::post('reset-password', 'AuthController@resetPassword')->name('resetPassword');
+    Route::get('allMatches', 'MatchController@allMatches')->name('allMatches');
+    Route::post('fetchSeriesData', 'SeriesController@fetchSeriesData');
     
     // After login endpoints
     Route::middleware(['auth:sanctum'])->group(function () {
         Route::get('user', 'UserController@getUser');
         Route::get('seriesList', 'SeriesController@getList');
         Route::get('pandits', 'PanditController@getAllPandits');
-        Route::post('fetchSeriesData', 'SeriesController@fetchSeriesData');
         Route::get('upcomingMatches', 'MatchController@getUpcomingList')->name('upcomingMatches');
         Route::get('recentMatches', 'MatchController@getRecentList')->name('recentMatches');
         Route::get('liveMatches', 'MatchController@getLiveList')->name('liveMatches');
-        Route::get('allMatches', 'MatchController@allMatches')->name('allMatches');
         Route::get('dashboardMatches', 'MatchController@dashboardList')->name('dashboardMatches');
         Route::post('matchesBySeriesId', 'MatchController@getList');
         Route::post('scorecardByMatchId', 'MatchController@scorecard')->name('scorecard');
