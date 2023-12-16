@@ -57,6 +57,7 @@ class MatchController extends Controller
                 'matchs',
                 'venue',
                 'match_type',
+                'astrology_status',
                 'min_rate',
                 'max_rate',
                 'fav_team',

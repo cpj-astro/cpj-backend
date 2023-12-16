@@ -22,6 +22,7 @@ Route::group(['prefix' => 'v1/admin'], function(){
         // Match Related Routes
         Route::post('addMatch', 'Admin\AdminController@addMatch')->name('addMatch');
         Route::post('updateMatch', 'Admin\AdminController@updateMatch')->name('updateMatch');
+        Route::post('updateMatchAstroStatus', 'Admin\AdminController@updateMatchAstroStatus')->name('updateMatchAstroStatus');
         Route::post('updateSeries', 'Admin\AdminController@updateSeries')->name('updateSeries');
         Route::get('seriesList', 'Admin\MatchController@seriesList');
         Route::get('upcomingMatches', 'Admin\MatchController@upcomingList');
@@ -36,11 +37,18 @@ Route::group(['prefix' => 'v1/admin'], function(){
         Route::post('sendNotification', 'Admin\AdminController@sendNotification')->name('sendNotification');
         
         // Private ads routes
-        Route::get('getAllPrivateAds/{user_id}', 'Admin\PrivateAdsController@getList')->name('getAllPrivateAds');
+        Route::get('getAllPrivateAds', 'Admin\PrivateAdsController@getList')->name('getAllPrivateAds');
         Route::get('privateAd/{id}', 'Admin\PrivateAdsController@getAd')->name('getAd');
         Route::post('privateAd', 'Admin\PrivateAdsController@addNewAd')->name('adPrivateAd');
         Route::delete('privateAd/{id}', 'Admin\PrivateAdsController@deleteAd')->name('deletePrivateAd');
         Route::post('privateAd/{id}', 'Admin\PrivateAdsController@updateAd')->name('updatePrivateAd');
+
+        // Reviews routes
+        Route::get('getAllReviews', 'Admin\AdminController@getAllReviews')->name('getAllReviews');
+        Route::get('review/{id}', 'Admin\AdminController@getReview')->name('getReview');
+        Route::post('review', 'Admin\AdminController@addReview')->name('addReview');
+        Route::delete('review/{id}', 'Admin\AdminController@deleteReview')->name('deleteReview');
+        Route::post('review/{id}', 'Admin\AdminController@updateReview')->name('updateReview');
 
         // Players routes
         Route::get('getPlayersList', 'Admin\PlayersController@getPlayersList');
@@ -112,6 +120,13 @@ Route::group(['prefix' => 'v1/cricketpanditji'], function(){
         Route::post('razorpay/create-order', 'PaymentController@createOrder');
         Route::post('razorpay/capture-payment', 'PaymentController@capturePayment');
         Route::post('webhook/razorpay', 'PaymentController@handleWebhook');
+
+        // Reviews routes
+        Route::get('getAllReviews', 'UserController@getAllReviews')->name('getAllReviews');
+
+        // Private Ads routes
+        Route::get('getAllPrivateAds', 'PrivateAdsController@getAllPrivateAds')->name('getAllPrivateAds');
+        
     });
 
     Route::get('/test', function () {

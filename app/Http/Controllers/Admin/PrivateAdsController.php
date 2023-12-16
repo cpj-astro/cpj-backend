@@ -12,29 +12,21 @@ use App\Http\Controllers\Controller;
 class PrivateAdsController extends Controller
 {
     use CommonTraits;
-    public function getList($user_id){
+    public function getList(){
         try {
-            if(!empty($user_id)){
-                $data = PrivateAds::where('user_id', $user_id)->get();
-                if ($data) {
-                    return response()->json([
-                        'data' => $data,
-                        'success' => true,
-                        'msg' => 'Data found'
-                    ], 200);
-                }
+            $data = PrivateAds::get();
+            if ($data) {
                 return response()->json([
-                    'data' => [],
-                    'success' => false,
-                    'msg' => 'No data found'
-                ], 200);
-            }else{
-                return response()->json([
-                    'data' => [],
-                    'success' => false,
-                    'msg' => 'Invalid user id'
+                    'data' => $data,
+                    'success' => true,
+                    'msg' => 'Data found'
                 ], 200);
             }
+            return response()->json([
+                'data' => [],
+                'success' => false,
+                'msg' => 'No data found'
+            ], 200);
         } catch (\Throwable $th) {
             //throw $th;
             $this->captureExceptionLog($th);
@@ -82,7 +74,6 @@ class PrivateAdsController extends Controller
                 'link' => 'required',
                 'category' => 'required',
                 'expiry_date' => 'required',
-                'user_id' => 'required',
             ];
             $messages = [
                 'title.required' => 'Title is mandatory',
@@ -90,8 +81,7 @@ class PrivateAdsController extends Controller
                 'status.required' => 'Status is mandatory',
                 'link.required' => 'Link is mandatory',
                 'category.required' => 'category is mandatory',
-                'expiry_date.required' => 'Expiry Date is mandatory',
-                'user_id.required' => 'User id is mandatory',
+                'expiry_date.required' => 'Expiry Date is mandatory'
             ];
 
             $validator = Validator::make($input, $rules, $messages);
@@ -110,11 +100,10 @@ class PrivateAdsController extends Controller
             $pd->link = $input['link'];
             $pd->category = $input['category'];
             $pd->expiry_date = $input['expiry_date'];
-            $pd->user_id = $input['user_id'];
             $pd->save();
+
             if ($file = $request->file('file')) {
                 $path = '/private_ads';
-                // $name = $file->getClientOriginalName();
 
                 $file_name = date('dmY_His') . '.' . $file->getClientOriginalExtension();
                 $file->move(public_path() . $path, $file_name);
@@ -151,7 +140,6 @@ class PrivateAdsController extends Controller
 
                 $old_image_path = public_path() . $path . $pdFile;
                 if (File::exists($old_image_path)) {
-                    //File::delete($image_path);
                     unlink($old_image_path);
                 }
             }
@@ -220,7 +208,5 @@ class PrivateAdsController extends Controller
                 'msg' => $th->getMessage()
             ], 200);
         }
-    }
-
-    
+    }   
 }

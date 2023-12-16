@@ -22,6 +22,7 @@ class Matches extends Model
         'matchs',
         'venue',
         'match_type',
+        'astrology_status',
         'min_rate',
         'max_rate',
         'fav_team',
@@ -95,8 +96,9 @@ class Matches extends Model
     }
 
     public function astrology() {
-        return $this->hasOne(MatchAstrology::class, 'match_id', 'match_id');
+        return $this->hasOne(MatchAstrology::class, 'match_id', 'match_id')->where('user_id', auth()->user()->id);
     }
+
     // public function getTeamAOverAttribute($value)
     // {
     //     return (isset($value) && !empty($value)) ? $value + 0 : $value;

@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\PersonalAccessToken;
 use App\Models\User;
 use App\Models\Payment;
+use App\Models\Reviews;
 use App\Models\UserApiRequest;
 use Illuminate\Http\Request;
 use App\Traits\CommonTraits;
@@ -407,6 +408,32 @@ class UserController extends Controller
                 'data' => $apiToken,
                 'success' => false,
                 'msg' => 'Error creating token'
+            ], 200);
+        } catch (\Throwable $th) {
+            //throw $th;
+            $this->captureExceptionLog($th);
+            return response()->json([
+                'data' => [],
+                'success' => false,
+                'msg' => $th->getMessage()
+            ], 200);
+        }
+    }
+
+    public function getAllReviews(){
+        try {
+            $data = Reviews::where('status', 1)->orderBy('created_at', 'desc')->limit(20)->get();
+            if ($data) {
+                return response()->json([
+                    'data' => $data,
+                    'success' => true,
+                    'msg' => 'Data found'
+                ], 200);
+            }
+            return response()->json([
+                'data' => [],
+                'success' => false,
+                'msg' => 'No data found'
             ], 200);
         } catch (\Throwable $th) {
             //throw $th;

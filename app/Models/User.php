@@ -68,6 +68,10 @@ class User extends Authenticatable
     }
 
     public function apiRequest(){
+        return $this->hasMany(MatchAstrology::class, 'user_id');
+    }
+
+    public function match_astrology(){
         return $this->hasMany(UserApiRequest::class, 'user_id');
     }
 }

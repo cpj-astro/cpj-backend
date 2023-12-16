@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use App\Traits\CommonTraits;
 use App\Models\Matches;
+use App\Models\User;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\File;
 
@@ -464,11 +465,16 @@ class MatchController extends Controller
     public function allMatches(Request $request){
         try {
             $userId = $request->get('user_id');
-
+            $userExisted = User::find($userId);
+            $userStatus = 'failed';
+            if($userExisted) {
+                $userStatus = 'success';
+            }
             $matchesData = Matches::select(
                 'matches.series_id',
                 's.series_name',
                 'matches.match_id',
+                'astrology_status',
                 'date_wise',
                 'match_date',
                 'match_time',
@@ -549,6 +555,7 @@ class MatchController extends Controller
                 return response()->json([
                     'data' => $matchesData,
                     'success' => true,
+                    'user_status' => $userStatus,
                     'msg' => 'Data found'
                 ], 200);
             }
@@ -556,6 +563,7 @@ class MatchController extends Controller
             return response()->json([
                 'data' => [],
                 'success' => false,
+                'user_status' => $userStatus,
                 'msg' => 'No data found'
             ], 200);
         } catch (\Throwable $th) {
@@ -563,6 +571,7 @@ class MatchController extends Controller
             return response()->json([
                 'data' => [],
                 'success' => false,
+                'user_status' => $userStatus,
                 'msg' => $th->getMessage()
             ], 200);
         }

@@ -6,12 +6,14 @@ use App\Models\CupRate;
 use App\Models\CupRateTeams;
 use App\Models\Matches;
 use App\Models\Series;
+use App\Models\Reviews;
 use App\Models\Setting;
 use Illuminate\Http\Request;
 use App\Traits\CommonTraits;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Validator;
 use App\Http\Controllers\Controller;
+use Illuminate\Support\Facades\File;
 
 class AdminController extends Controller
 {
@@ -20,42 +22,71 @@ class AdminController extends Controller
     {
         try {
             $input = $request->all();
+            $matchData = [
+                'team_a' => $input["team_a"],
+                'team_b' => $input["team_b"],
+                'team_a_short' => $input["team_a_short"],
+                'team_b_short' => $input["team_b_short"],
+                'team_a_id' => $input["team_a_id"],
+                'team_b_id' => $input["team_b_id"],
+                'match_date' => $input["date"],
+                'match_time' => $input["time"],
+                'datewise' => $input["day"],
+                'venue' => $input["ground_name"],
+                'team_a_img' => $input["team_a_img"],
+                'team_b_img' => $input["team_b_img"],
+                'toss' => $input["toss"],
+                'umpire' => $input["umpire"],
+                'third_umpire' => $input["third_umpire"],
+                'referee' => $input["referee"],
+                'matchs' => $input["matchs"],
+                'series_id' => $input["series_name"],
+                'match_id' => $input["match_id"],
+                'match_category' => $input["match_category"],
+            ];
+            $n = Matches::create($matchData);
+            if($n) {
+                return response()->json([
+                    'data' => [],
+                    'success' => true,
+                    'msg' => 'Data inserted successfully'
+                ], 200);
+            } else {
+                return response()->json([
+                    'data' => [],
+                    'success' => false,
+                    'msg' => 'Cannot insert data'
+                ], 200);
+            }
+        } catch (\Throwable $th) {
+            $this->captureExceptionLog($th);
+            return response()->json([
+                'data' => [],
+                'success' => false,
+                'msg' => $th->getMessage()
+            ], 200);
+        }
+    }
+
+    public function updateMatchAstroStatus(Request $request)
+    {
+        try {
+            $input = $request->all();
             if (isset($input['match_id']) && !empty($input['match_id'])) {
                 $matchId = $input['match_id'];
-                $matchData = [
-                    'team_a' => $input["team_a"],
-                    'team_b' => $input["team_b"],
-                    'team_a_short' => $input["team_a_short"],
-                    'team_b_short' => $input["team_b_short"],
-                    'team_a_id' => $input["team_a_id"],
-                    'team_b_id' => $input["team_b_id"],
-                    'match_date' => $input["date"],
-                    'match_time' => $input["time"],
-                    'datewise' => $input["day"],
-                    'venue' => $input["ground_name"],
-                    'team_a_img' => $input["team_a_img"],
-                    'team_b_img' => $input["team_b_img"],
-                    'toss' => $input["toss"],
-                    'umpire' => $input["umpire"],
-                    'third_umpire' => $input["third_umpire"],
-                    'referee' => $input["referee"],
-                    'matchs' => $input["matchs"],
-                    'series_id' => $input["series_name"],
-                    'match_id' => $input["match_id"],
-                    'match_category' => $input["match_category"],
-                ];
-                $n = Matches::create($matchData);
-                if($n) {
+                $data = Matches::where('match_id', $matchId)->update($input);
+                
+                if ($data) {
                     return response()->json([
                         'data' => [],
                         'success' => true,
-                        'msg' => 'Data inserted successfully'
+                        'msg' => 'Data updated successfully'
                     ], 200);
                 } else {
                     return response()->json([
                         'data' => [],
                         'success' => false,
-                        'msg' => 'Cannot insert data'
+                        'msg' => 'Cannot update data'
                     ], 200);
                 }
             } else {
@@ -74,6 +105,7 @@ class AdminController extends Controller
             ], 200);
         }
     }
+
     public function updateMatch(Request $request)
     {
         try {
@@ -353,6 +385,176 @@ class AdminController extends Controller
                 'data' => $response,
                 'success' => true,
                 'msg' => 'Notification send successfully'
+            ], 200);
+        } catch (\Throwable $th) {
+            $this->captureExceptionLog($th);
+            return response()->json([
+                'data' => [],
+                'success' => false,
+                'msg' => $th->getMessage()
+            ], 200);
+        }
+    }
+
+    public function getAllReviews(){
+        try {
+            $data = Reviews::get();
+            if ($data) {
+                return response()->json([
+                    'data' => $data,
+                    'success' => true,
+                    'msg' => 'Data found'
+                ], 200);
+            }
+            return response()->json([
+                'data' => [],
+                'success' => false,
+                'msg' => 'No data found'
+            ], 200);
+        } catch (\Throwable $th) {
+            //throw $th;
+            $this->captureExceptionLog($th);
+            return response()->json([
+                'data' => [],
+                'success' => false,
+                'msg' => $th->getMessage()
+            ], 200);
+        }
+    }
+
+    public function getReview($id){
+        try {
+            $data = Reviews::find($id);
+            if ($data) {
+                return response()->json([
+                    'data' => $data,
+                    'success' => true,
+                    'msg' => 'Data found'
+                ], 200);
+            }
+            return response()->json([
+                'data' => [],
+                'success' => false,
+                'msg' => 'No data found'
+            ], 200);
+        } catch (\Throwable $th) {
+            //throw $th;
+            $this->captureExceptionLog($th);
+            return response()->json([
+                'data' => [],
+                'success' => false,
+                'msg' => $th->getMessage()
+            ], 200);
+        }
+    }
+
+    public function addReview(Request $request){
+        try {
+            $input = $request->all();
+
+            $pd = new Reviews();
+            if(isset($input['user_id']) && !empty($input['user_id'])){
+                $pd->user_id = $input['user_id'];
+            }
+            $pd->user_name = $input['user_name'];
+            $pd->review = $input['review'];
+            $pd->rating = $input['rating'];
+            $pd->status = $input['status'];
+            $pd->save();
+
+            if ($file = $request->file('file')) {
+                $path = '/reviews';
+
+                $file_name = date('dmY_His') . '.' . $file->getClientOriginalExtension();
+                $file->move(public_path() . $path, $file_name);
+
+                $pd->user_img = url($path . "/" . $file_name);
+                $pd->save();
+            }
+            return response()->json([
+                'data' => [],
+                'success' => true,
+                'msg' => 'Review successfully inserted'
+            ], 200);
+        } catch (\Throwable $th) {
+            $this->captureExceptionLog($th);
+            return response()->json([
+                'data' => [],
+                'success' => false,
+                'msg' => $th->getMessage()
+            ], 200);
+        }
+    }
+
+    public function deleteReview($id){
+        try {
+            $pd = Reviews::findOrFail($id);
+            $pdFile = $pd->user_img;
+
+            
+            $deletSql = $pd->delete();
+            if ($deletSql) {
+                $pdFile = substr($pdFile, strrpos($pdFile ,"/") + 1);
+
+                $path = '/reviews/';
+
+                $old_image_path = public_path() . $path . $pdFile;
+                if (File::exists($old_image_path)) {
+                    unlink($old_image_path);
+                }
+            }
+
+            return response()->json([
+                'data' => [],
+                'success' => true,
+                'msg' => 'Review successfully removed'
+            ], 200);
+
+        } catch (\Throwable $th) {
+            $this->captureExceptionLog($th);
+            return response()->json([
+                'data' => [],
+                'success' => false,
+                'msg' => $th->getMessage()
+            ], 200);
+        }
+    }
+
+    public function updateReview($id, Request $request){
+        try {
+            $input = $request->all();
+            $pd = Reviews::findOrFail($id);
+            $oldMedia = $pd->user_img;
+            $pd->user_name = $input['user_name'];
+            $pd->review = $input['review'];
+            $pd->rating = $input['rating'];
+            $pd->status = $input['status'];
+            $pd->save();
+
+            if ($file = $request->file('file')) {
+                $path = '/reviews';
+
+                $file_name = date('dmY_His') . '.' . $file->getClientOriginalExtension();
+                $file->move(public_path() . $path, $file_name);
+
+                $pd->user_img = url($path . "/" . $file_name);
+                $pd->save();
+
+                if(isset($oldMedia) && !empty($oldMedia)){
+                    $oldMedia = substr($oldMedia, strrpos($oldMedia ,"/") + 1);
+                    $path = '/reviews/';
+    
+                    $oldMediaPath = public_path() . $path . $oldMedia;
+    
+                    if (File::exists($oldMediaPath)) {
+                        unlink($oldMediaPath);
+                    }
+                }
+            }
+            return response()->json([
+                'data' => [],
+                'success' => true,
+                'msg' => 'Review successfully updated'
             ], 200);
         } catch (\Throwable $th) {
             $this->captureExceptionLog($th);
