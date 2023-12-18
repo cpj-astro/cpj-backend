@@ -73,10 +73,11 @@ Route::group(['prefix' => 'v1/admin'], function(){
             Route::get('getPanditById/{id}', 'Admin\PanditController@getPanditById');
             Route::get('getAllPandits', 'Admin\PanditController@getAllPandits'); 
         });
-
+        
         // Users routes
         Route::post('users/create-token/{user_id}', 'UserController@createToken');
-        Route::resource('users', 'UserController');
+        Route::resource('users', 'UserController');        
+        Route::get('getUserDetails/{id}', 'UserController@getUserDetails');
     });
 });
 

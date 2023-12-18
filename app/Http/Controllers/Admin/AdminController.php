@@ -22,6 +22,15 @@ class AdminController extends Controller
     {
         try {
             $input = $request->all();
+            $checkExistedMatch = Matches::where('match_id', $input['match_id'])->first();
+            
+            if(isset($checkExistedMatch) && isset($checkExistedMatch->match_id)) {
+                return response()->json([
+                    'data' => [],
+                    'success' => true,
+                    'msg' => 'This Match Id is already exists.',
+                ], 200);
+            }
             $matchData = [
                 'team_a' => $input["team_a"],
                 'team_b' => $input["team_b"],
@@ -49,7 +58,7 @@ class AdminController extends Controller
                 return response()->json([
                     'data' => [],
                     'success' => true,
-                    'msg' => 'Data inserted successfully'
+                    'msg' => 'Match created successfully'
                 ], 200);
             } else {
                 return response()->json([
