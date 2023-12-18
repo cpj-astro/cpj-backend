@@ -90,6 +90,8 @@ Route::group(['prefix' => 'v1/cricketpanditji'], function(){
     Route::post('reset-password', 'AuthController@resetPassword')->name('resetPassword');
     Route::get('allMatches', 'MatchController@allMatches')->name('allMatches');
     Route::post('fetchSeriesData', 'SeriesController@fetchSeriesData');
+    Route::get('getAllReviews', 'UserController@getAllReviews')->name('getAllReviews');
+    Route::get('getAllPrivateAds', 'PrivateAdsController@getAllPrivateAds')->name('getAllPrivateAds');
     
     // After login endpoints
     Route::middleware(['auth:sanctum'])->group(function () {
@@ -122,11 +124,6 @@ Route::group(['prefix' => 'v1/cricketpanditji'], function(){
         Route::post('razorpay/capture-payment', 'PaymentController@capturePayment');
         Route::post('webhook/razorpay', 'PaymentController@handleWebhook');
 
-        // Reviews routes
-        Route::get('getAllReviews', 'UserController@getAllReviews')->name('getAllReviews');
-
-        // Private Ads routes
-        Route::get('getAllPrivateAds', 'PrivateAdsController@getAllPrivateAds')->name('getAllPrivateAds');
         
     });
 
