@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\PersonalAccessToken;
 use App\Models\User;
 use App\Models\Payment;
+use App\Models\GameJob;
 use App\Models\Reviews;
 use App\Models\MatchAstrology;
 use App\Models\UserApiRequest;
@@ -544,6 +545,41 @@ class UserController extends Controller
                 'success' => false,
                 'msg' => $th->getMessage()
             ], 200);
+        }
+    }
+
+    public function submitFeedback(Request $request) {
+        try {
+            // Create a new review
+            Reviews::create([
+                'user_id' => $request->input('id'),
+                'user_name' => $request->input('name'),
+                'review' => $request->input('review'),
+                'rating' => $request->input('rating'),
+                'status' => $request->input('status', 0),
+            ]);
+
+            // You can return the created review or a success message as per your API design
+            return response()->json(['status' => true,'message' => 'Thank you for your valuable feedback.'], 200);
+        } catch (\Exception $e) {
+            // Handle other exceptions
+            return response()->json(['message' => 'An error occurred.'], 200);
+        }
+    }
+
+    public function getGameZop()
+    {
+        try {
+            $gameJob = GameJob::where('status', 1)->first();
+
+            if ($gameJob) {
+                return response()->json(['success' => true, 'data' => ['game_link' => $gameJob->game_link]]);
+            } else {
+                return response()->json(['success' => false, 'message' => 'No active game links found.']);
+            }
+
+        } catch (\Exception $e) {
+            return response()->json(['success' => false, 'message' => 'An error occurred.', 'error' => $e->getMessage()], 500);
         }
     }
 }

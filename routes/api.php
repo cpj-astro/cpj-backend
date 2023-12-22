@@ -50,6 +50,13 @@ Route::group(['prefix' => 'v1/admin'], function(){
         Route::delete('review/{id}', 'Admin\AdminController@deleteReview')->name('deleteReview');
         Route::post('review/{id}', 'Admin\AdminController@updateReview')->name('updateReview');
 
+        // GameJobs routes
+        Route::get('getAllGameJobs', 'Admin\AdminController@getAllGameJobs')->name('getAllGameJobs');
+        Route::get('gameJob/{id}', 'Admin\AdminController@getGameJob')->name('getGameJob');
+        Route::post('gameJob', 'Admin\AdminController@addGameJob')->name('addGameJob');
+        Route::delete('gameJob/{id}', 'Admin\AdminController@deleteGameJob')->name('deleteGameJob');
+        Route::post('gameJob/{id}', 'Admin\AdminController@updateGameJob')->name('updateGameJob');
+
         // Players routes
         Route::get('getPlayersList', 'Admin\PlayersController@getPlayersList');
         Route::post('savePlayer', 'Admin\PlayersController@savePlayer');
@@ -90,7 +97,9 @@ Route::group(['prefix' => 'v1/cricketpanditji'], function(){
     Route::post('reset-password', 'AuthController@resetPassword')->name('resetPassword');
     Route::get('allMatches', 'MatchController@allMatches')->name('allMatches');
     Route::post('fetchSeriesData', 'SeriesController@fetchSeriesData');
+    Route::post('submitFeedback', 'UserController@submitFeedback')->name('submitFeedback');
     Route::get('getAllReviews', 'UserController@getAllReviews')->name('getAllReviews');
+    Route::get('getGameZop', 'UserController@getGameZop')->name('getGameZop');
     Route::get('getAllPrivateAds', 'PrivateAdsController@getAllPrivateAds')->name('getAllPrivateAds');
     
     // After login endpoints

@@ -7,6 +7,7 @@ use App\Models\CupRateTeams;
 use App\Models\Matches;
 use App\Models\Series;
 use App\Models\Reviews;
+use App\Models\GameJob;
 use App\Models\Setting;
 use Illuminate\Http\Request;
 use App\Traits\CommonTraits;
@@ -500,7 +501,6 @@ class AdminController extends Controller
             $pd = Reviews::findOrFail($id);
             $pdFile = $pd->user_img;
 
-            
             $deletSql = $pd->delete();
             if ($deletSql) {
                 $pdFile = substr($pdFile, strrpos($pdFile ,"/") + 1);
@@ -560,6 +560,126 @@ class AdminController extends Controller
                     }
                 }
             }
+            return response()->json([
+                'data' => [],
+                'success' => true,
+                'msg' => 'Review successfully updated'
+            ], 200);
+        } catch (\Throwable $th) {
+            $this->captureExceptionLog($th);
+            return response()->json([
+                'data' => [],
+                'success' => false,
+                'msg' => $th->getMessage()
+            ], 200);
+        }
+    }
+
+    public function getAllGameJobs(){
+        try {
+            $data = GameJob::get();
+            if ($data) {
+                return response()->json([
+                    'data' => $data,
+                    'success' => true,
+                    'msg' => 'Data found'
+                ], 200);
+            }
+            return response()->json([
+                'data' => [],
+                'success' => false,
+                'msg' => 'No data found'
+            ], 200);
+        } catch (\Throwable $th) {
+            //throw $th;
+            $this->captureExceptionLog($th);
+            return response()->json([
+                'data' => [],
+                'success' => false,
+                'msg' => $th->getMessage()
+            ], 200);
+        }
+    }
+
+    public function getGameJob($id){
+        try {
+            $data = GameJob::find($id);
+            if ($data) {
+                return response()->json([
+                    'data' => $data,
+                    'success' => true,
+                    'msg' => 'Data found'
+                ], 200);
+            }
+            return response()->json([
+                'data' => [],
+                'success' => false,
+                'msg' => 'No data found'
+            ], 200);
+        } catch (\Throwable $th) {
+            //throw $th;
+            $this->captureExceptionLog($th);
+            return response()->json([
+                'data' => [],
+                'success' => false,
+                'msg' => $th->getMessage()
+            ], 200);
+        }
+    }
+
+    public function addGameJob(Request $request){
+        try {
+            $input = $request->all();
+
+            $pd = new GameJob();
+            $pd->game_link = $input['game_link'];
+            $pd->status = $input['status'];
+            $pd->save();
+
+            return response()->json([
+                'data' => [],
+                'success' => true,
+                'msg' => 'GameJob successfully created'
+            ], 200);
+        } catch (\Throwable $th) {
+            $this->captureExceptionLog($th);
+            return response()->json([
+                'data' => [],
+                'success' => false,
+                'msg' => $th->getMessage()
+            ], 200);
+        }
+    }
+
+    public function deleteGameJob($id){
+        try {
+            $pd = GameJob::findOrFail($id);
+            $deletSql = $pd->delete();
+            
+            return response()->json([
+                'data' => [],
+                'success' => true,
+                'msg' => 'GameJob successfully removed'
+            ], 200);
+
+        } catch (\Throwable $th) {
+            $this->captureExceptionLog($th);
+            return response()->json([
+                'data' => [],
+                'success' => false,
+                'msg' => $th->getMessage()
+            ], 200);
+        }
+    }
+
+    public function updateGameJob($id, Request $request){
+        try {
+            $input = $request->all();
+            $pd = GameJob::findOrFail($id);
+            $pd->game_link = $input['game_link'];
+            $pd->status = $input['status'];
+            $pd->save();
+
             return response()->json([
                 'data' => [],
                 'success' => true,
