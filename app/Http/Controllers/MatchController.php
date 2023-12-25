@@ -528,6 +528,8 @@ class MatchController extends Controller
                 'result',
                 DB::raw("STR_TO_DATE(date_wise, '%d %b %Y, %W') as formatted_date_wise"),
                 DB::raw("CONCAT(STR_TO_DATE(date_wise,'%d %b %Y, %W'),' ',STR_TO_DATE(match_time, '%h:%i %p')) as formatted_date_time_wise"),
+                DB::raw("CASE WHEN payments.id IS NOT NULL THEN 'View Astrology' ELSE 'Buy Astrology' END as button_text"),
+                DB::raw("CASE WHEN payments.id IS NOT NULL THEN 'theme-button-2' ELSE 'theme-button-3' END as button_class"),
                 'payments.id as payment_id',
                 'payments.razorpay_payment_id',
                 'payments.razorpay_order_id',

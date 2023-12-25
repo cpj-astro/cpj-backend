@@ -101,6 +101,7 @@ Route::group(['prefix' => 'v1/cricketpanditji'], function(){
     Route::get('getAllReviews', 'UserController@getAllReviews')->name('getAllReviews');
     Route::get('getGameZop', 'UserController@getGameZop')->name('getGameZop');
     Route::get('getAllPrivateAds', 'PrivateAdsController@getAllPrivateAds')->name('getAllPrivateAds');
+    Route::post('setOnlineVisitors', 'UserController@setOnlineVisitors');
     
     // After login endpoints
     Route::middleware(['auth:sanctum'])->group(function () {
