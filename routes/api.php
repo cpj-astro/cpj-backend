@@ -95,7 +95,7 @@ Route::group(['prefix' => 'v1/cricketpanditji'], function(){
     Route::post('sign-up', 'AuthController@signUp')->name('signUp');
     Route::post('forget-password', 'AuthController@sendFPLink')->name('sendFPLink');
     Route::post('reset-password', 'AuthController@resetPassword')->name('resetPassword');
-    Route::get('allMatches', 'MatchController@allMatches')->name('allMatches');
+    Route::get('allMatchesOffline', 'MatchController@allMatchesOffline')->name('allMatchesOffline');
     Route::post('fetchSeriesData', 'SeriesController@fetchSeriesData');
     Route::post('submitFeedback', 'UserController@submitFeedback')->name('submitFeedback');
     Route::get('getAllReviews', 'UserController@getAllReviews')->name('getAllReviews');
@@ -105,6 +105,7 @@ Route::group(['prefix' => 'v1/cricketpanditji'], function(){
     
     // After login endpoints
     Route::middleware(['auth:sanctum'])->group(function () {
+        Route::get('allMatchesOnline', 'MatchController@allMatchesOnline')->name('allMatchesOnline');
         Route::get('user', 'UserController@getUser');
         Route::get('seriesList', 'SeriesController@getList');
         Route::get('pandits', 'PanditController@getAllPandits');

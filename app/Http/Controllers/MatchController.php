@@ -8,6 +8,7 @@ use App\Models\Matches;
 use App\Models\User;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\File;
+use Illuminate\Support\Facades\Auth;
 
 class MatchController extends Controller
 {
@@ -462,14 +463,9 @@ class MatchController extends Controller
         }
     }
     
-    public function allMatches(Request $request){
+    public function allMatchesOffline(Request $request){
         try {
-            $userId = $request->get('user_id');
-            $userExisted = User::find($userId);
-            $userStatus = 'failed';
-            if($userExisted) {
-                $userStatus = 'success';
-            }
+            $userId = null;
             $matchesData = Matches::select(
                 'matches.series_id',
                 's.series_name',
@@ -557,7 +553,6 @@ class MatchController extends Controller
                 return response()->json([
                     'data' => $matchesData,
                     'success' => true,
-                    'user_status' => $userStatus,
                     'msg' => 'Data found'
                 ], 200);
             }
@@ -565,7 +560,6 @@ class MatchController extends Controller
             return response()->json([
                 'data' => [],
                 'success' => false,
-                'user_status' => $userStatus,
                 'msg' => 'No data found'
             ], 200);
         } catch (\Throwable $th) {
@@ -573,7 +567,116 @@ class MatchController extends Controller
             return response()->json([
                 'data' => [],
                 'success' => false,
-                'user_status' => $userStatus,
+                'msg' => $th->getMessage()
+            ], 200);
+        }
+    }
+
+    public function allMatchesOnline(Request $request){
+        try {
+            $user = Auth::user(); // Assuming you are using Laravel's built-in authentication
+            $userId = $user->id;
+            $matchesData = Matches::select(
+                'matches.series_id',
+                's.series_name',
+                'matches.match_id',
+                'astrology_status',
+                'date_wise',
+                'match_date',
+                'match_time',
+                'matchs',
+                'venue',
+                'match_type',
+                'min_rate',
+                'max_rate',
+                'fav_team',
+                'team_a_id',
+                'team_a',
+                'team_a_short',
+                'team_a_img',
+                'team_a_score',
+                'team_a_scores',
+                'team_a_over',
+                'team_b_id',
+                'team_b',
+                'team_b_short',
+                'team_b_img',
+                'team_b_score',
+                'team_b_scores',
+                'team_b_over',
+                'matches.toss',
+                'back1',
+                'back2',
+                'back3',
+                'lay1',
+                'lay2',
+                'lay3',
+                'batsman',
+                'bowler',
+                'curr_rate',
+                'first_circle',
+                'fancy',
+                'last4overs',
+                'lastwicket',
+                'match_over',
+                'partnership',
+                'rr_rate',
+                'second_circle',
+                'target',
+                'team_a_scores_over',
+                'team_b_scores_over',
+                'yet_to_bat',
+                'match_category',
+                'fancy_info',
+                'pitch_report',
+                'weather',
+                'session',
+                'result',
+                DB::raw("STR_TO_DATE(date_wise, '%d %b %Y, %W') as formatted_date_wise"),
+                DB::raw("CONCAT(STR_TO_DATE(date_wise,'%d %b %Y, %W'),' ',STR_TO_DATE(match_time, '%h:%i %p')) as formatted_date_time_wise"),
+                DB::raw("CASE WHEN payments.id IS NOT NULL THEN 'View Astrology' ELSE 'Buy Astrology' END as button_text"),
+                DB::raw("CASE WHEN payments.id IS NOT NULL THEN 'theme-button-2' ELSE 'theme-button-3' END as button_class"),
+                'payments.id as payment_id',
+                'payments.razorpay_payment_id',
+                'payments.razorpay_order_id',
+                'payments.razorpay_signature',
+                'payments.amount as payment_amount',
+                'payments.status as payment_status',
+                'payments.created_at as payment_created',
+                'payments.updated_at as payment_updated',
+                'astrology_data'
+            )
+            ->leftJoin('payments', function($join) use ($userId) {
+                $join->on('matches.match_id', '=', 'payments.match_id')
+                    ->where('payments.user_id', '=', $userId);
+            })
+            ->leftJoin('match_astrology', function($join) use ($userId) {
+                $join->on('matches.match_id', '=', 'match_astrology.match_id')
+                    ->where('match_astrology.user_id', '=', $userId);
+            })
+            ->leftJoin('series as s', 's.series_id', '=', 'matches.series_id')
+            ->whereIn('match_category',  ['live', 'upcoming'])
+            ->orderBy('formatted_date_time_wise', 'asc')
+            ->get();
+            
+            if (isset($matchesData) && !empty($matchesData) && count($matchesData) > 0) {
+                return response()->json([
+                    'data' => $matchesData,
+                    'success' => true,
+                    'msg' => 'Data found'
+                ], 200);
+            }
+    
+            return response()->json([
+                'data' => [],
+                'success' => false,
+                'msg' => 'No data found'
+            ], 200);
+        } catch (\Throwable $th) {
+            $this->captureExceptionLog($th);
+            return response()->json([
+                'data' => [],
+                'success' => false,
                 'msg' => $th->getMessage()
             ], 200);
         }
