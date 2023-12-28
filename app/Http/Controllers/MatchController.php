@@ -6,6 +6,7 @@ use Illuminate\Http\Request;
 use App\Traits\CommonTraits;
 use App\Models\Matches;
 use App\Models\User;
+use App\Models\Teams;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\File;
 use Illuminate\Support\Facades\Auth;
@@ -440,12 +441,23 @@ class MatchController extends Controller
                 })
                 ->leftJoin('series as s', 's.series_id', '=', 'matches.series_id')
                 ->where('matches.match_id', $match_id)->where('matches.status', 1)->first();
-                
-                return response()->json([
-                    'data' => $matchesData,
-                    'success' => true,
-                    'msg' => 'Data found'
-                ], 200);
+                // Retrieve teams for the specified match
+                $teamsData = Teams::where('match_id', $match_id)->get();
+
+                if ($matchesData) {
+                    return response()->json([
+                        'data' =>  $matchesData,
+                        'teams' => $teamsData,
+                        'success' => true,
+                        'msg' => 'Data found'
+                    ], 200);
+                } else {
+                    return response()->json([
+                        'data' => [],
+                        'success' => false,
+                        'msg' => 'No data found for the specified match id'
+                    ], 200);
+                }
             } else {
                 return response()->json([
                     'data' => [],

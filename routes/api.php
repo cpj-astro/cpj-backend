@@ -63,8 +63,13 @@ Route::group(['prefix' => 'v1/admin'], function(){
         Route::get('getPlayer/{id}', 'Admin\PlayersController@getPlayer');
         Route::delete('deletePlayer/{id}', 'Admin\PlayersController@deletePlayer');
 
-        // Kundli routes
-        
+        // Teams routes
+        Route::get('getAllTeams', 'Admin\MatchController@getAllTeams')->name('getAllTeams');
+        Route::get('team/{id}', 'Admin\MatchController@getTeam')->name('getTeam');
+        Route::post('team', 'Admin\MatchController@addTeam')->name('addTeam');
+        Route::delete('team/{id}', 'Admin\MatchController@deleteTeam')->name('deleteTeam');
+        Route::post('team/{id}', 'Admin\MatchController@updateTeam')->name('updateTeam');
+
         // Astrology routes
         Route::get('fetchUniqueYearsAndMonths', 'Admin\AstrologyController@fetchUniqueYearsAndMonths');
         Route::post('uploadAstrology', 'Admin\AstrologyController@uploadAstrology');

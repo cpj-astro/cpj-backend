@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use App\Traits\CommonTraits;
 use App\Models\Matches;
+use App\Models\Teams;
 use App\Models\Series;
 use App\Models\Kundli;
 use Illuminate\Support\Facades\DB;
@@ -441,6 +442,58 @@ class MatchController extends Controller
                 'success' => false,
                 'msg' => 'An error occurred'
             ], 200); // 500 Internal Server Error status code
+        }
+    }
+
+    public function getAllTeams()
+    {
+        try {
+            $teams = Teams::all();
+            return response()->json(['success' => true, 'data' => $teams, 'msg' => 'Data Found'], 200);
+        } catch (\Exception $e) {
+            return response()->json(['success' => false, 'error' => $e->getMessage()], 500);
+        }
+    }
+
+    public function getTeam($id)
+    {
+        try {
+            $team = Teams::findOrFail($id);
+            return response()->json(['success' => true, 'data' => $team, 'msg' => 'Data Found'], 200);
+        } catch (\Exception $e) {
+            return response()->json(['success' => false, 'error' => $e->getMessage(), 'msg' => $e->getMessage()], 200);
+        }
+    }
+
+    public function addTeam(Request $request)
+    {
+        try {
+            $team = Teams::create($request->all());
+            return response()->json(['success' => true, 'data' => $team, 'msg' => 'Team Added Successfully'], 200);
+        } catch (\Exception $e) {
+            return response()->json(['success' => false, 'error' => $e->getMessage(), 'msg' => $e->getMessage()], 200);
+        }
+    }
+
+    public function deleteTeam($id)
+    {
+        try {
+            $team = Teams::findOrFail($id);
+            $team->delete();
+            return response()->json(['success' => true, 'message' => 'Team deleted successfully', 'msg' => 'Team Deleted Successfully'] , 200);
+        } catch (\Exception $e) {
+            return response()->json(['success' => false, 'error' => $e->getMessage(), 'msg' => $e->getMessage()], 200);
+        }
+    }
+
+    public function updateTeam(Request $request, $id)
+    {
+        try {
+            $team = Teams::findOrFail($id);
+            $team->update($request->all());
+            return response()->json(['success' => true, 'data' => $team, 'msg' => 'Team Updated Successfully'], 200);
+        } catch (\Exception $e) {
+            return response()->json(['success' => false, 'error' => $e->getMessage(), 'msg' => $e->getMessage()], 200);
         }
     }
 }
