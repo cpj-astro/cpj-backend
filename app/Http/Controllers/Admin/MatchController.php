@@ -445,10 +445,10 @@ class MatchController extends Controller
         }
     }
 
-    public function getAllTeams()
+    public function getAllTeams($id)
     {
         try {
-            $teams = Teams::all();
+            $teams = Teams::where('match_id', $id)->get();
             return response()->json(['success' => true, 'data' => $teams, 'msg' => 'Data Found'], 200);
         } catch (\Exception $e) {
             return response()->json(['success' => false, 'error' => $e->getMessage()], 500);
