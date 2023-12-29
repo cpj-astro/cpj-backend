@@ -107,7 +107,10 @@ Route::group(['prefix' => 'v1/cricketpanditji'], function(){
     Route::get('getGameZop', 'UserController@getGameZop')->name('getGameZop');
     Route::get('getAllPrivateAds', 'PrivateAdsController@getAllPrivateAds')->name('getAllPrivateAds');
     Route::post('setOnlineVisitors', 'UserController@setOnlineVisitors');
-    
+    Route::get('offlineUpcomingMatches', 'MatchController@offlineUpcomingMatches')->name('offlineUpcomingMatches');
+    Route::get('offlineRecentMatches', 'MatchController@offlineRecentMatches')->name('offlineRecentMatches');
+    Route::get('offlineLiveMatches', 'MatchController@offlineLiveMatches')->name('offlineLiveMatches');
+
     // After login endpoints
     Route::middleware(['auth:sanctum'])->group(function () {
         Route::get('allMatchesOnline', 'MatchController@allMatchesOnline')->name('allMatchesOnline');
@@ -133,14 +136,13 @@ Route::group(['prefix' => 'v1/cricketpanditji'], function(){
             return response('Test API', 200)->header('Content-Type', 'application/json');
         });
         
+        // Send message route
         Route::post('sendMessage', 'ContactController@sendMessage');
         
         // Payment routes
         Route::post('razorpay/create-order', 'PaymentController@createOrder');
         Route::post('razorpay/capture-payment', 'PaymentController@capturePayment');
         Route::post('webhook/razorpay', 'PaymentController@handleWebhook');
-
-        
     });
 
     Route::get('/test', function () {

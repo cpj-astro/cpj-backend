@@ -574,7 +574,7 @@ class UserController extends Controller
             $gameJob = GameJob::where('status', 1)->first();
 
             if ($gameJob) {
-                return response()->json(['success' => true, 'data' => ['game_link' => $gameJob->game_link]]);
+                return response()->json(['success' => true, 'data' => ['game_link' => $gameJob->game_link, 'status' => $gameJob->status]]);
             } else {
                 return response()->json(['success' => false, 'message' => 'No active game links found.']);
             }

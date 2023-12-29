@@ -196,12 +196,307 @@ class MatchController extends Controller
         }
     }
 
+    public function offlineLiveMatches(){
+        $userId = auth()->id(); // Assuming you are using Laravel's built-in authentication
+        try {
+            $matchesData = Matches::select(
+                'matches.series_id',
+                's.series_name',
+                'matches.match_id',
+                'date_wise',
+                'match_date',
+                'match_time',
+                'matchs',
+                'venue',
+                'match_type',
+                'min_rate',
+                'max_rate',
+                'fav_team',
+                's_ovr',
+                's_min',
+                's_max',
+                'session',
+                'team_a_id',
+                'team_a',
+                'team_a_short',
+                'team_a_score',
+                'team_a_over',
+                'team_a_img',
+                'team_b_id',
+                'team_b',
+                'team_b_short',
+                'team_b_score',
+                'team_b_over',
+                'team_b_img',
+                'match_category',
+                DB::raw("STR_TO_DATE(date_wise, '%d %b %Y, %W') as formatted_date_wise"),
+                DB::raw("CONCAT(STR_TO_DATE(date_wise,'%d %b %Y, %W'),' ',STR_TO_DATE(match_time, '%h:%i %p')) as formatted_date_time_wise"),
+                'payments.id as payment_id',
+                'payments.razorpay_payment_id',
+                'payments.razorpay_order_id',
+                'payments.razorpay_signature',
+                'payments.amount as payment_amount',
+                'payments.status as payment_status',
+                'payments.created_at as payment_created',
+                'payments.updated_at as payment_updated'
+            )
+                ->leftJoin('payments', function($join) use ($userId) {
+                    $join->on('matches.match_id', '=', 'payments.match_id')
+                        ->where('payments.user_id', '=', $userId);
+                })
+                ->join('series as s', 's.series_id', '=', 'matches.series_id')
+                ->where('match_category', 'live')
+                ->orderBy('formatted_date_time_wise', 'asc')
+                ->get();
+    
+            if (isset($matchesData) && !empty($matchesData) && count($matchesData) > 0) {
+                return response()->json([
+                    'data' => $matchesData,
+                    'success' => true,
+                    'msg' => 'Data found'
+                ], 200);
+            }
+    
+            return response()->json([
+                'data' => [],
+                'success' => false,
+                'msg' => 'No data found'
+            ], 200);
+        } catch (\Throwable $th) {
+            $this->captureExceptionLog($th);
+            return response()->json([
+                'data' => [],
+                'success' => false,
+                'msg' => $th->getMessage()
+            ], 200);
+        }
+    }
+    
+    public function offlineUpcomingMatches()
+    {
+        $userId = auth()->id(); // Assuming you are using Laravel's built-in authentication
+        try {
+            $matchesData = Matches::select(
+                'matches.series_id',
+                'matches.match_id',
+                's.series_name',
+                'date_wise',
+                'match_date',
+                'match_time',
+                'matchs',
+                'venue',
+                'match_type',
+                'min_rate',
+                'max_rate',
+                'fav_team',
+                'team_a_id',
+                'team_a',
+                'team_a_short',
+                'team_a_img',
+                'team_b_id',
+                'team_b',
+                'team_b_short',
+                'team_b_img',
+                'match_category',
+                DB::raw("STR_TO_DATE(date_wise, '%d %b %Y, %W') as formatted_date_wise"),
+                DB::raw("CONCAT(STR_TO_DATE(date_wise,'%d %b %Y, %W'),' ',STR_TO_DATE(match_time, '%h:%i %p')) as formatted_date_time_wise"),
+                'payments.id as payment_id',
+                'payments.razorpay_payment_id',
+                'payments.razorpay_order_id',
+                'payments.razorpay_signature',
+                'payments.amount as payment_amount',
+                'payments.status as payment_status',
+                'payments.created_at as payment_created',
+                'payments.updated_at as payment_updated'
+            )
+            ->leftJoin('payments', function($join) use ($userId) {
+                $join->on('matches.match_id', '=', 'payments.match_id')
+                ->where('payments.user_id', '=', $userId);
+            })
+            ->join('series as s', 's.series_id', '=', 'matches.series_id')
+            ->where('match_category', 'upcoming')->orderBy('formatted_date_time_wise', 'asc')->get();
+            if (isset($matchesData) && !empty($matchesData) && count($matchesData) > 0) {
+                return response()->json([
+                    'data' => $matchesData,
+                    'success' => true,
+                    'msg' => 'Data found'
+                ], 200);
+            }
+            return response()->json([
+                'data' => [],
+                'success' => false,
+                'msg' => 'No data found'
+            ], 200);
+        } catch (\Throwable $th) {
+            //throw $th;
+            $this->captureExceptionLog($th);
+            return response()->json([
+                'data' => [],
+                'success' => false,
+                'msg' => $th->getMessage()
+            ], 200);
+        }
+    }
+
+    public function offlineRecentMatches()
+    {
+        $userId = auth()->id(); // Assuming you are using Laravel's built-in authentication
+        try {
+            $matchesData = Matches::select(
+                'matches.series_id',
+                'matches.match_id',
+                's.series_name',
+                'date_wise',
+                'match_date',
+                'match_time',
+                'matchs',
+                'venue',
+                'match_type',
+                'min_rate',
+                'max_rate',
+                'fav_team',
+                'team_a_id',
+                'team_a',
+                'team_a_short',
+                'team_a_scores',
+                'team_a_score',
+                'team_a_over',
+                'team_a_img',
+                'team_a_scores_over',
+                'team_b_id',
+                'team_b',
+                'team_b_short',
+                'team_b_scores',
+                'team_b_score',
+                'team_b_over',
+                'team_b_img',
+                'team_b_scores_over',
+                'result',
+                'match_category',
+                DB::raw("STR_TO_DATE(date_wise, '%d %b %Y, %W') as formatted_date_wise"),
+                DB::raw("CONCAT(STR_TO_DATE(date_wise,'%d %b %Y, %W'),' ',STR_TO_DATE(match_time, '%h:%i %p')) as formatted_date_time_wise"),
+                'payments.id as payment_id',
+                'payments.razorpay_payment_id',
+                'payments.razorpay_order_id',
+                'payments.razorpay_signature',
+                'payments.amount as payment_amount',
+                'payments.status as payment_status',
+                'payments.created_at as payment_created',
+                'payments.updated_at as payment_updated'
+            )
+            ->leftJoin('payments', function($join) use ($userId) {
+                $join->on('matches.match_id', '=', 'payments.match_id')
+                ->where('payments.user_id', '=', $userId);
+            })
+            ->join('series as s', 's.series_id', '=', 'matches.series_id')
+            ->where('match_category', 'recent')->orderBy('formatted_date_time_wise', 'desc')->get();
+            
+                if (isset($matchesData) && !empty($matchesData) && count($matchesData) > 0) {
+                return response()->json([
+                    'data' => $matchesData,
+                    'success' => true,
+                    'msg' => 'Data found'
+                ], 200);
+            }
+            return response()->json([
+                'data' => [],
+                'success' => false,
+                'msg' => 'No data found'
+            ], 200);
+        } catch (\Throwable $th) {
+            //throw $th;
+            $this->captureExceptionLog($th);
+            return response()->json([
+                'data' => [],
+                'success' => false,
+                'msg' => $th->getMessage()
+            ], 200);
+        }
+    }
+    
+    public function getLiveList(){
+        try {
+            $userId = auth()->id(); // Assuming you are using Laravel's built-in authentication
+    
+            $matchesData = Matches::select(
+                'matches.series_id',
+                's.series_name',
+                'matches.match_id',
+                'date_wise',
+                'match_date',
+                'match_time',
+                'matchs',
+                'venue',
+                'match_type',
+                'min_rate',
+                'max_rate',
+                'fav_team',
+                's_ovr',
+                's_min',
+                's_max',
+                'session',
+                'team_a_id',
+                'team_a',
+                'team_a_short',
+                'team_a_score',
+                'team_a_over',
+                'team_a_img',
+                'team_b_id',
+                'team_b',
+                'team_b_short',
+                'team_b_score',
+                'team_b_over',
+                'team_b_img',
+                'match_category',
+                DB::raw("STR_TO_DATE(date_wise, '%d %b %Y, %W') as formatted_date_wise"),
+                DB::raw("CONCAT(STR_TO_DATE(date_wise,'%d %b %Y, %W'),' ',STR_TO_DATE(match_time, '%h:%i %p')) as formatted_date_time_wise"),
+                'payments.id as payment_id',
+                'payments.razorpay_payment_id',
+                'payments.razorpay_order_id',
+                'payments.razorpay_signature',
+                'payments.amount as payment_amount',
+                'payments.status as payment_status',
+                'payments.created_at as payment_created',
+                'payments.updated_at as payment_updated'
+            )
+                ->leftJoin('payments', function($join) use ($userId) {
+                    $join->on('matches.match_id', '=', 'payments.match_id')
+                        ->where('payments.user_id', '=', $userId);
+                })
+                ->join('series as s', 's.series_id', '=', 'matches.series_id')
+                ->where('match_category', 'live')
+                ->orderBy('formatted_date_time_wise', 'asc')
+                ->get();
+    
+            if (isset($matchesData) && !empty($matchesData) && count($matchesData) > 0) {
+                return response()->json([
+                    'data' => $matchesData,
+                    'success' => true,
+                    'msg' => 'Data found'
+                ], 200);
+            }
+    
+            return response()->json([
+                'data' => [],
+                'success' => false,
+                'msg' => 'No data found'
+            ], 200);
+        } catch (\Throwable $th) {
+            $this->captureExceptionLog($th);
+            return response()->json([
+                'data' => [],
+                'success' => false,
+                'msg' => $th->getMessage()
+            ], 200);
+        }
+    }
+
     public function getUpcomingList()
     {
         try {
             $matchesData = Matches::select(
                 'matches.series_id',
-                'match_id',
+                'matches.match_id',
                 's.series_name',
                 'date_wise',
                 'match_date',
@@ -254,7 +549,7 @@ class MatchController extends Controller
         try {
             $matchesData = Matches::select(
                 'matches.series_id',
-                'match_id',
+                'matches.match_id',
                 's.series_name',
                 'date_wise',
                 'match_date',
@@ -671,83 +966,6 @@ class MatchController extends Controller
             ->orderBy('formatted_date_time_wise', 'asc')
             ->get();
             
-            if (isset($matchesData) && !empty($matchesData) && count($matchesData) > 0) {
-                return response()->json([
-                    'data' => $matchesData,
-                    'success' => true,
-                    'msg' => 'Data found'
-                ], 200);
-            }
-    
-            return response()->json([
-                'data' => [],
-                'success' => false,
-                'msg' => 'No data found'
-            ], 200);
-        } catch (\Throwable $th) {
-            $this->captureExceptionLog($th);
-            return response()->json([
-                'data' => [],
-                'success' => false,
-                'msg' => $th->getMessage()
-            ], 200);
-        }
-    }
-    
-    public function getLiveList(){
-        try {
-            $userId = auth()->id(); // Assuming you are using Laravel's built-in authentication
-    
-            $matchesData = Matches::select(
-                'matches.series_id',
-                's.series_name',
-                'matches.match_id',
-                'date_wise',
-                'match_date',
-                'match_time',
-                'matchs',
-                'venue',
-                'match_type',
-                'min_rate',
-                'max_rate',
-                'fav_team',
-                's_ovr',
-                's_min',
-                's_max',
-                'session',
-                'team_a_id',
-                'team_a',
-                'team_a_short',
-                'team_a_score',
-                'team_a_over',
-                'team_a_img',
-                'team_b_id',
-                'team_b',
-                'team_b_short',
-                'team_b_score',
-                'team_b_over',
-                'team_b_img',
-                'match_category',
-                DB::raw("STR_TO_DATE(date_wise, '%d %b %Y, %W') as formatted_date_wise"),
-                DB::raw("CONCAT(STR_TO_DATE(date_wise,'%d %b %Y, %W'),' ',STR_TO_DATE(match_time, '%h:%i %p')) as formatted_date_time_wise"),
-                'payments.id as payment_id',
-                'payments.razorpay_payment_id',
-                'payments.razorpay_order_id',
-                'payments.razorpay_signature',
-                'payments.amount as payment_amount',
-                'payments.status as payment_status',
-                'payments.created_at as payment_created',
-                'payments.updated_at as payment_updated'
-            )
-                ->leftJoin('payments', function($join) use ($userId) {
-                    $join->on('matches.match_id', '=', 'payments.match_id')
-                        ->where('payments.user_id', '=', $userId);
-                })
-                ->join('series as s', 's.series_id', '=', 'matches.series_id')
-                ->where('match_category', 'live')
-                ->orderBy('formatted_date_time_wise', 'asc')
-                ->get();
-    
             if (isset($matchesData) && !empty($matchesData) && count($matchesData) > 0) {
                 return response()->json([
                     'data' => $matchesData,
