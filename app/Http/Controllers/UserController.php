@@ -7,6 +7,7 @@ use App\Models\User;
 use App\Models\Payment;
 use App\Models\GameJob;
 use App\Models\OnlineVisitors;
+use App\Models\Visitors;
 use App\Models\Reviews;
 use App\Models\MatchAstrology;
 use App\Models\UserApiRequest;
@@ -583,15 +584,10 @@ class UserController extends Controller
             return response()->json(['success' => false, 'message' => 'An error occurred.', 'error' => $e->getMessage()], 500);
         }
     }
-
-    public function setOnlineVisitors(Request $request) {
-        try {
-            $ip = $request->ip();
-
-            \Log::info("Hello World!");
-            \Log::info($request);
-        } catch (\Exception $e) {
-            
-        }
-    }       
+    
+    public function getVisitor()
+    {
+        $visitor = Visitors::first();
+        return response()->json(['success' => true, 'data' => $visitor]);
+    }
 }

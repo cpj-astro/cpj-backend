@@ -197,12 +197,13 @@ class MatchController extends Controller
     }
 
     public function offlineLiveMatches(){
-        $userId = auth()->id(); // Assuming you are using Laravel's built-in authentication
+        $userId = null; // Assuming you are using Laravel's built-in authentication
         try {
             $matchesData = Matches::select(
                 'matches.series_id',
                 's.series_name',
                 'matches.match_id',
+                'astrology_status',
                 'date_wise',
                 'match_date',
                 'match_time',
@@ -231,6 +232,8 @@ class MatchController extends Controller
                 'match_category',
                 DB::raw("STR_TO_DATE(date_wise, '%d %b %Y, %W') as formatted_date_wise"),
                 DB::raw("CONCAT(STR_TO_DATE(date_wise,'%d %b %Y, %W'),' ',STR_TO_DATE(match_time, '%h:%i %p')) as formatted_date_time_wise"),
+                DB::raw("CASE WHEN payments.id IS NOT NULL THEN 'View Astrology' ELSE 'Buy Astrology' END as button_text"),
+                DB::raw("CASE WHEN payments.id IS NOT NULL THEN 'theme-button-2' ELSE 'theme-button-3' END as button_class"),
                 'payments.id as payment_id',
                 'payments.razorpay_payment_id',
                 'payments.razorpay_order_id',
@@ -274,11 +277,12 @@ class MatchController extends Controller
     
     public function offlineUpcomingMatches()
     {
-        $userId = auth()->id(); // Assuming you are using Laravel's built-in authentication
+        $userId = null; // Assuming you are using Laravel's built-in authentication
         try {
             $matchesData = Matches::select(
                 'matches.series_id',
                 'matches.match_id',
+                'astrology_status',
                 's.series_name',
                 'date_wise',
                 'match_date',
@@ -300,6 +304,8 @@ class MatchController extends Controller
                 'match_category',
                 DB::raw("STR_TO_DATE(date_wise, '%d %b %Y, %W') as formatted_date_wise"),
                 DB::raw("CONCAT(STR_TO_DATE(date_wise,'%d %b %Y, %W'),' ',STR_TO_DATE(match_time, '%h:%i %p')) as formatted_date_time_wise"),
+                DB::raw("CASE WHEN payments.id IS NOT NULL THEN 'View Astrology' ELSE 'Buy Astrology' END as button_text"),
+                DB::raw("CASE WHEN payments.id IS NOT NULL THEN 'theme-button-2' ELSE 'theme-button-3' END as button_class"),
                 'payments.id as payment_id',
                 'payments.razorpay_payment_id',
                 'payments.razorpay_order_id',
@@ -340,11 +346,12 @@ class MatchController extends Controller
 
     public function offlineRecentMatches()
     {
-        $userId = auth()->id(); // Assuming you are using Laravel's built-in authentication
+        $userId = null; // Assuming you are using Laravel's built-in authentication
         try {
             $matchesData = Matches::select(
                 'matches.series_id',
                 'matches.match_id',
+                'astrology_status',
                 's.series_name',
                 'date_wise',
                 'match_date',
@@ -375,6 +382,8 @@ class MatchController extends Controller
                 'match_category',
                 DB::raw("STR_TO_DATE(date_wise, '%d %b %Y, %W') as formatted_date_wise"),
                 DB::raw("CONCAT(STR_TO_DATE(date_wise,'%d %b %Y, %W'),' ',STR_TO_DATE(match_time, '%h:%i %p')) as formatted_date_time_wise"),
+                DB::raw("CASE WHEN payments.id IS NOT NULL THEN 'View Astrology' ELSE 'Buy Astrology' END as button_text"),
+                DB::raw("CASE WHEN payments.id IS NOT NULL THEN 'theme-button-2' ELSE 'theme-button-3' END as button_class"),
                 'payments.id as payment_id',
                 'payments.razorpay_payment_id',
                 'payments.razorpay_order_id',
@@ -422,6 +431,7 @@ class MatchController extends Controller
                 'matches.series_id',
                 's.series_name',
                 'matches.match_id',
+                'astrology_status',
                 'date_wise',
                 'match_date',
                 'match_time',
@@ -450,6 +460,8 @@ class MatchController extends Controller
                 'match_category',
                 DB::raw("STR_TO_DATE(date_wise, '%d %b %Y, %W') as formatted_date_wise"),
                 DB::raw("CONCAT(STR_TO_DATE(date_wise,'%d %b %Y, %W'),' ',STR_TO_DATE(match_time, '%h:%i %p')) as formatted_date_time_wise"),
+                DB::raw("CASE WHEN payments.id IS NOT NULL THEN 'View Astrology' ELSE 'Buy Astrology' END as button_text"),
+                DB::raw("CASE WHEN payments.id IS NOT NULL THEN 'theme-button-2' ELSE 'theme-button-3' END as button_class"),
                 'payments.id as payment_id',
                 'payments.razorpay_payment_id',
                 'payments.razorpay_order_id',
@@ -457,8 +469,13 @@ class MatchController extends Controller
                 'payments.amount as payment_amount',
                 'payments.status as payment_status',
                 'payments.created_at as payment_created',
-                'payments.updated_at as payment_updated'
+                'payments.updated_at as payment_updated',
+                'astrology_data'
             )
+                ->leftJoin('match_astrology', function($join) use ($userId) {
+                    $join->on('matches.match_id', '=', 'match_astrology.match_id')
+                        ->where('match_astrology.user_id', '=', $userId);
+                })
                 ->leftJoin('payments', function($join) use ($userId) {
                     $join->on('matches.match_id', '=', 'payments.match_id')
                         ->where('payments.user_id', '=', $userId);
@@ -494,9 +511,12 @@ class MatchController extends Controller
     public function getUpcomingList()
     {
         try {
+            $user = Auth::user(); // Assuming you are using Laravel's built-in authentication
+            $userId = $user->id;
             $matchesData = Matches::select(
                 'matches.series_id',
                 'matches.match_id',
+                'astrology_status',
                 's.series_name',
                 'date_wise',
                 'match_date',
@@ -517,9 +537,28 @@ class MatchController extends Controller
                 'team_b_img',
                 'match_category',
                 DB::raw("STR_TO_DATE(date_wise, '%d %b %Y, %W') as formatted_date_wise"),
-                DB::raw("CONCAT(STR_TO_DATE(date_wise,'%d %b %Y, %W'),' ',STR_TO_DATE(match_time, '%h:%i %p')) as formatted_date_time_wise")
+                DB::raw("CONCAT(STR_TO_DATE(date_wise,'%d %b %Y, %W'),' ',STR_TO_DATE(match_time, '%h:%i %p')) as formatted_date_time_wise"),
+                DB::raw("CASE WHEN payments.id IS NOT NULL THEN 'View Astrology' ELSE 'Buy Astrology' END as button_text"),
+                DB::raw("CASE WHEN payments.id IS NOT NULL THEN 'theme-button-2' ELSE 'theme-button-3' END as button_class"),
+                'payments.id as payment_id',
+                'payments.razorpay_payment_id',
+                'payments.razorpay_order_id',
+                'payments.razorpay_signature',
+                'payments.amount as payment_amount',
+                'payments.status as payment_status',
+                'payments.created_at as payment_created',
+                'payments.updated_at as payment_updated',
+                'astrology_data'
             )
             ->join('series as s', 's.series_id', '=', 'matches.series_id')
+            ->leftJoin('payments', function($join) use ($userId) {
+                $join->on('matches.match_id', '=', 'payments.match_id')
+                    ->where('payments.user_id', '=', $userId);
+            })
+            ->leftJoin('match_astrology', function($join) use ($userId) {
+                $join->on('matches.match_id', '=', 'match_astrology.match_id')
+                    ->where('match_astrology.user_id', '=', $userId);
+            })
                 ->where('match_category', 'upcoming')->orderBy('formatted_date_time_wise', 'asc')->get();
             if (isset($matchesData) && !empty($matchesData) && count($matchesData) > 0) {
                 return response()->json([
@@ -547,9 +586,12 @@ class MatchController extends Controller
     public function getRecentList()
     {
         try {
+            $user = Auth::user(); // Assuming you are using Laravel's built-in authentication
+            $userId = $user->id;
             $matchesData = Matches::select(
                 'matches.series_id',
                 'matches.match_id',
+                'astrology_status',
                 's.series_name',
                 'date_wise',
                 'match_date',
@@ -579,9 +621,28 @@ class MatchController extends Controller
                 'result',
                 'match_category',
                 DB::raw("STR_TO_DATE(date_wise, '%d %b %Y, %W') as formatted_date_wise"),
-                DB::raw("CONCAT(STR_TO_DATE(date_wise,'%d %b %Y, %W'),' ',STR_TO_DATE(match_time, '%h:%i %p')) as formatted_date_time_wise")
+                DB::raw("CONCAT(STR_TO_DATE(date_wise,'%d %b %Y, %W'),' ',STR_TO_DATE(match_time, '%h:%i %p')) as formatted_date_time_wise"),
+                DB::raw("CASE WHEN payments.id IS NOT NULL THEN 'View Astrology' ELSE 'Buy Astrology' END as button_text"),
+                DB::raw("CASE WHEN payments.id IS NOT NULL THEN 'theme-button-2' ELSE 'theme-button-3' END as button_class"),
+                'payments.id as payment_id',
+                'payments.razorpay_payment_id',
+                'payments.razorpay_order_id',
+                'payments.razorpay_signature',
+                'payments.amount as payment_amount',
+                'payments.status as payment_status',
+                'payments.created_at as payment_created',
+                'payments.updated_at as payment_updated',
+                'astrology_data'
             )
             ->join('series as s', 's.series_id', '=', 'matches.series_id')
+            ->leftJoin('payments', function($join) use ($userId) {
+                $join->on('matches.match_id', '=', 'payments.match_id')
+                    ->where('payments.user_id', '=', $userId);
+            })
+            ->leftJoin('match_astrology', function($join) use ($userId) {
+                $join->on('matches.match_id', '=', 'match_astrology.match_id')
+                    ->where('match_astrology.user_id', '=', $userId);
+            })
                 ->where('match_category', 'recent')->orderBy('formatted_date_time_wise', 'desc')->get();
             if (isset($matchesData) && !empty($matchesData) && count($matchesData) > 0) {
                 return response()->json([

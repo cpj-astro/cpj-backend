@@ -8,6 +8,7 @@ use App\Models\Matches;
 use App\Models\Series;
 use App\Models\Reviews;
 use App\Models\GameJob;
+use App\Models\Visitors;
 use App\Models\Setting;
 use Illuminate\Http\Request;
 use App\Traits\CommonTraits;
@@ -694,4 +695,26 @@ class AdminController extends Controller
             ], 200);
         }
     }
+
+    public function getVisitor()
+    {
+        $visitor = Visitors::first();
+        return response()->json(['success' => true, 'data' => $visitor]);
+    }
+
+    public function updateVisitor(Request $request)
+    {
+        $data = $request->all();
+        $visitor = Visitors::first();
+
+        if ($visitor) {
+            $visitor->update($data);
+            return response()->json(['success' => true, 'msg' => 'Visitor updated successfully']);
+        } else {
+            // If no record exists, create a new one
+            Visitors::create($data);
+            return response()->json(['success' => true, 'msg' => 'Visitor created successfully']);
+        }
+    }
+
 }

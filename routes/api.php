@@ -90,6 +90,10 @@ Route::group(['prefix' => 'v1/admin'], function(){
         Route::post('users/create-token/{user_id}', 'UserController@createToken');
         Route::resource('users', 'UserController');        
         Route::get('getUserDetails/{id}', 'UserController@getUserDetails');
+
+        // Fetch visitors
+        Route::get('getVisitor', 'Admin\AdminController@getVisitor')->name('getVisitor');
+        Route::put('visitor/{id?}', 'Admin\AdminController@updateVisitor')->name('updateVisitor');
     });
 });
 
@@ -110,6 +114,7 @@ Route::group(['prefix' => 'v1/cricketpanditji'], function(){
     Route::get('offlineUpcomingMatches', 'MatchController@offlineUpcomingMatches')->name('offlineUpcomingMatches');
     Route::get('offlineRecentMatches', 'MatchController@offlineRecentMatches')->name('offlineRecentMatches');
     Route::get('offlineLiveMatches', 'MatchController@offlineLiveMatches')->name('offlineLiveMatches');
+    Route::get('getVisitor', 'UserController@getVisitor')->name('getVisitor');
 
     // After login endpoints
     Route::middleware(['auth:sanctum'])->group(function () {
