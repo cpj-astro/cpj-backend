@@ -1152,11 +1152,6 @@ class MatchController extends Controller
                     'match_id' => $match_id
                 ];
                 $res = $this->pullData($apiUrl, 'POST', $postData);
-
-                // comment the below before live
-                // $path = public_path() . "/matchOddHistory.json";
-                // $res = File::get($path);
-
                 $res = json_decode($res, true);
 
                 if ($res['status']) {

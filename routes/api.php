@@ -115,6 +115,9 @@ Route::group(['prefix' => 'v1/cricketpanditji'], function(){
     Route::get('offlineRecentMatches', 'MatchController@offlineRecentMatches')->name('offlineRecentMatches');
     Route::get('offlineLiveMatches', 'MatchController@offlineLiveMatches')->name('offlineLiveMatches');
     Route::get('getVisitor', 'UserController@getVisitor')->name('getVisitor');
+    Route::get('news', 'NewsController@getNews')->name('news');
+    Route::post('news', 'NewsController@getNewsDetail')->name('news.post');
+    Route::post('commentary', 'MatchController@commentary')->name('commentary');
 
     // After login endpoints
     Route::middleware(['auth:sanctum'])->group(function () {
@@ -131,9 +134,6 @@ Route::group(['prefix' => 'v1/cricketpanditji'], function(){
         Route::post('matchOddHistory', 'MatchController@getOddHistory')->name('matchOddHistory');
         Route::post('matchInfo', 'MatchController@matchInfo')->name('matchInfo');
         Route::post('squadByMatchId', 'MatchController@squadByMatchId')->name('squadByMatchId');
-        Route::post('commentary', 'MatchController@commentary')->name('commentary');
-        Route::get('news', 'NewsController@getNews')->name('news');
-        Route::post('news', 'NewsController@getNewsDetail')->name('news.post');
         Route::post('pointsTable', 'SeriesController@getPointsTable')->name('pointsTable');
         Route::get('cupRates', 'CupRateController@cupRates')->name('cupRates');
         Route::get('me', 'AuthController@me');
