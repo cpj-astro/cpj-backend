@@ -16,7 +16,7 @@ class SeriesController extends Controller
     public function fetchSeriesData(Request $request) {
         try {
             $data = Series::select('series_id','series_name','series_date','total_matches','start_date','end_date','image','month_wise')
-                ->where('series_id', $request[0])->first();
+                ->where('series_id', $request->input('series_id'))->first();
             return response()->json([
                 'data' => $data,
                 'success' => true,
