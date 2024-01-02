@@ -33,7 +33,7 @@ class FetchMatchesBySeriesId extends Command
      */
     public function __construct()
     {
-        $this->apiUrl = config('services.cricket-champion.endpoint').'matchesBySeriesId/'.config('services.cricket-champion.token');
+        $this->apiUrl = config('services.cricket-champion.endpoint').'upcomingMatchesBySeriesId/'.config('services.cricket-champion.token');
         parent::__construct();
     }
 
@@ -89,7 +89,6 @@ class FetchMatchesBySeriesId extends Command
                 }
             }
         } catch (\Throwable $th) {
-            dd($th->getMessage());
             $this->captureExceptionLog($th, $this->signature);
         }
         return 0;
