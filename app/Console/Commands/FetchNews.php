@@ -46,6 +46,8 @@ class FetchNews extends Command
     {
         try {
             $res = $this->pullData($this->apiUrl, 'GET');
+            
+            dd($res);
             $res = json_decode($res, true);
             if ($res && $res['status']) {
                 foreach ($res['data'] as $key => $value) {
