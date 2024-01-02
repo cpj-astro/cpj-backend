@@ -52,7 +52,11 @@ class FetchMatchesBySeriesId extends Command
                         'series_id' => $value->series_id
                     ];
                     $res = $this->pullData($this->apiUrl,'POST',$postData);
-                    
+                    \Log::info("-------- Series Data --------");
+                    \Log::info("Seried ID:");
+                    \Log::info($value->series_id);
+                    \Log::info($res);
+                    \Log::info("-------- End Data --------");
                     // comment the below before live
                     // $path = public_path() . "/matchesBySeriesId.json";
                     // $res = File::get($path);
@@ -61,11 +65,21 @@ class FetchMatchesBySeriesId extends Command
                     
                     if($res['status']){
                         foreach ($res['data'] as $iKey => $iVal) {
+                            // Rename 'match_status' to 'match_category' in the response
+                            if(isset($iVal['match_status'])) {
+                                $iVal['match_category'] = strtolower($iVal['match_status']);
+                                unset($iVal['match_status']);
+                            }
                             $data = Matches::where('series_id', $value->series_id)->where('match_id',$iVal['match_id'])->first();
                             $params = $iVal;
                             $params['series_id'] = $value->series_id;
                             $params['source'] = 'CricketChampion';
                             $params['status'] = 1;
+                            
+                            // Convert 'match_category' to lowercase before saving or updating
+                            if(isset($params['match_category'])) {
+                                $params['match_category'] = strtolower($params['match_category']);
+                            }
 
                             if($data){
                                 // Update

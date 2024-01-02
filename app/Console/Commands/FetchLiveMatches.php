@@ -45,14 +45,8 @@ class FetchLiveMatches extends Command
     {
         try {
             $res = $this->pullData($this->apiUrl, 'GET');
-
-            // comment the below before live
-            // $path = public_path() . "/liveMatches.json";
-            // $res = File::get($path);
-
             $res = json_decode($res, true);
-            // $this->captureLog($res);
-            // dd($res['status'] === true);
+            
             if (!empty($res) && $res['status']) {
                 foreach ($res['data'] as $key => $value) {
                     $params = array(
@@ -73,14 +67,14 @@ class FetchLiveMatches extends Command
                         "team_a" => (isset($value['team_a']) && !empty($value['team_a'])) ? $value['team_a'] : NULL,
                         "team_a_short" => (isset($value['team_a_short']) && !empty($value['team_a_short'])) ? $value['team_a_short'] : NULL,
                         "team_a_img" => (isset($value['team_a_img']) && !empty($value['team_a_img'])) ? $value['team_a_img'] : NULL,
-                        "team_a_score" => (isset($value['team_a_score']) && !empty($value['team_a_score'])) ? $value['team_a_score'] : NULL,
-                        "team_a_scores_over" => (isset($value['team_a_scores_over']) && !empty($value['team_a_scores_over'])) ? $value['team_a_scores_over'] : NULL,
+                        "team_a_score" => (isset($value['team_a_score']) && !empty($value['team_a_score'])) ? json_encode($value['team_a_score']) : NULL,
+                        "team_a_scores_over" => (isset($value['team_a_scores_over']) && !empty($value['team_a_scores_over'])) ? json_encode($value['team_a_scores_over']) : NULL,
                         "team_b_id" => (isset($value['team_b_id']) && !empty($value['team_b_id'])) ? $value['team_b_id'] : NULL,
                         "team_b" => (isset($value['team_b']) && !empty($value['team_b'])) ? $value['team_b'] : NULL,
                         "team_b_short" => (isset($value['team_b_short']) && !empty($value['team_b_short'])) ? $value['team_b_short'] : NULL,
                         "team_b_img" => (isset($value['team_b_img']) && !empty($value['team_b_img'])) ? $value['team_b_img'] : NULL,
-                        "team_b_score" => (isset($value['team_b_score']) && !empty($value['team_b_score'])) ? $value['team_b_score'] : NULL,
-                        "team_b_scores_over" => (isset($value['team_b_scores_over']) && !empty($value['team_b_scores_over'])) ? $value['team_b_scores_over'] : NULL,
+                        "team_b_score" => (isset($value['team_b_score']) && !empty($value['team_b_score'])) ? json_encode($value['team_b_score']) : NULL,
+                        "team_b_scores_over" => (isset($value['team_b_scores_over']) && !empty($value['team_b_scores_over'])) ? json_encode($value['team_b_scores_over']) : NULL,
                     );
                     $params['match_category'] = 'live';
                     $params['source'] = 'CricketChampion';
@@ -89,11 +83,10 @@ class FetchLiveMatches extends Command
                     // $this->captureLog($params);
                     $data = Matches::where('match_id', $value['match_id'])->first();
                     if ($data) {
-                        if($data->source == 'admin'){
-                            
-                        }
-                        // Update
                         $data->update($params);
+                    } else {
+                        $params['match_id'] = $value['match_id'];
+                        $data = Matches::create($params);
                     }
                 }
             } else {

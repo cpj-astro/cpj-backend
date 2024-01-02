@@ -72,15 +72,15 @@ class FetchLiveMatchDetail extends Command
                                     "balling_team" => isset($resp['balling_team']) && !empty($resp['balling_team']) ? $resp['balling_team'] : NULL,
                                     "session" => isset($resp['session']) && !empty($resp['session']) ? $resp['session'] : NULL,
                                     "first_circle" => isset($resp['first_circle']) && !empty($resp['first_circle']) ? $resp['first_circle'] : NULL,
-                                    "team_a_score" => isset($resp['team_a_score']) && !empty($resp['team_a_score']) ? $resp['team_a_score'] : NULL,
+                                    "team_a_score" => isset($resp['team_a_score']) && !empty($resp['team_a_score']) ? json_encode($resp['team_a_score']) : NULL,
                                     "curr_rate" => isset($resp['curr_rate']) && !empty($resp['curr_rate']) ? $resp['curr_rate'] : NULL,
                                     "rr_rate" => isset($resp['rr_rate']) && !empty($resp['rr_rate']) ? preg_replace("/[^0-9.]/", 0, $resp['rr_rate']) : NULL,
                                     "team_a_scores" => isset($resp['team_a_scores']) && !empty($resp['team_a_scores']) ? $resp['team_a_scores'] : NULL,
                                     "team_a_over" => isset($resp['team_a_over']) && !empty($resp['team_a_over']) ? $resp['team_a_over'] : NULL,
-                                    "team_a_scores_over" => isset($resp['team_a_scores_over']) && !empty($resp['team_a_scores_over']) ? $resp['team_a_scores_over'] : NULL,
+                                    "team_a_scores_over" => isset($resp['team_a_scores_over']) && !empty($resp['team_a_scores_over']) ? json_encode($resp['team_a_scores_over']) : NULL,
                                     "team_b_scores" => isset($resp['team_b_scores']) && !empty($resp['team_b_scores']) ? $resp['team_b_scores'] : NULL,
                                     "team_b_over" => isset($resp['team_b_over']) && !empty($resp['team_b_over']) ? $resp['team_b_over'] : NULL,
-                                    "team_b_scores_over" => isset($resp['team_b_scores_over']) && !empty($resp['team_b_scores_over']) ? $resp['team_b_scores_over'] : NULL,
+                                    "team_b_scores_over" => isset($resp['team_b_scores_over']) && !empty($resp['team_b_scores_over']) ? json_encode($resp['team_b_scores_over']) : NULL,
                                     "lastwicket" => isset($resp['lastwicket']) && !empty($resp['lastwicket']) ? $resp['lastwicket'] : NULL,
                                     "batsman" => isset($resp['batsman']) && !empty($resp['batsman']) ? $resp['batsman'] : NULL,
                                     "partnership" => isset($resp['partnership']) && !empty($resp['partnership']) ? $resp['partnership'] : NULL,
@@ -91,7 +91,6 @@ class FetchLiveMatchDetail extends Command
                                 );
                                 // If the matched is moved by admin then do not get the match odds from API till the toss. After toss update the match odds from API.
                                 if(!($value->source == 'admin' && $params['toss'] === NULL)){
-
                                     $params = array_merge($params, $this->prepareMatchData($value));
                                 }
                                 Matches::where('match_id', $value->match_id)->update($params);
