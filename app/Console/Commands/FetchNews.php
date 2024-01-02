@@ -81,6 +81,7 @@ class FetchNews extends Command
                 }
             }
         } catch (\Throwable $th) {
+            dd($th->getMessage());
             $this->captureExceptionLog($th, $this->signature);
         }
         return 0;
