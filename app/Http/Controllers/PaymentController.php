@@ -75,6 +75,62 @@ class PaymentController extends Controller
         }
     }
 
+    public function phonepeStatus(Request $request) {
+        try {
+            $saltKey = '07afb8d3-ec97-49c3-9ff0-f7b73942c08f';
+            $data = $request->all();
+            $merchantId = $data['merchantId'];
+            $transactionId = $data['transactionId'];
+            $payload = "/pg/v1/status/".$merchantId."/".$transactionId."/".$saltKey;
+            $Checksum = hash('sha256', $payload);
+            $Checksum = $Checksum.'###1';
+
+            $curl = curl_init();
+    
+            curl_setopt_array($curl, array(
+                CURLOPT_URL => 'https://api.preprod.phonepe.com/apis/hermes/pg/v1/status/'.$merchantId."/".$transactionId,
+                CURLOPT_RETURNTRANSFER => true,
+                CURLOPT_ENCODING => '',
+                CURLOPT_MAXREDIRS => 10,
+                CURLOPT_TIMEOUT => 30,
+                CURLOPT_FOLLOWLOCATION => true,
+                CURLOPT_SSL_VERIFYHOST => false,
+                CURLOPT_SSL_VERIFYPEER => false,
+                CURLOPT_HTTP_VERSION => CURL_HTTP_VERSION_1_1,
+                CURLOPT_CUSTOMREQUEST => 'GET',
+                CURLOPT_HTTPHEADER => [
+                    "Content-Type: application/json",
+                    "X-VERIFY: ".$Checksum,
+                    "X-MERCHANT-ID: ".$merchantId,
+                    "accept: application/json"
+                ],
+            ));
+    
+            $response = curl_exec($curl);
+    
+            if (curl_errno($curl)) {     
+                $error_msg = curl_error($curl); 
+                Log::info($error_msg);
+            } 
+            
+            curl_close($curl);
+
+            $responseData = json_decode($response, true);
+            
+            \Log::info("responseStatus");
+            \Log::info($responseData);
+
+            return response()->json(['status' => true ,'Credentials Verified! Moving for payment'], 200);
+        } catch (\Throwable $th) {
+            $this->captureExceptionLog($th);
+            return response()->json([
+                'data' => [],
+                'success' => false,
+                'msg' => $th->getMessage()
+            ], 200);
+        }
+    }
+
     public function createOrder(Request $request)
     {
         $api = new Api(env('RAZORPAY_KEY'), env('RAZORPAY_SECRET'));

@@ -137,18 +137,20 @@ Route::group(['prefix' => 'v1/cricketpanditji'], function(){
         Route::post('pointsTable', 'SeriesController@getPointsTable')->name('pointsTable');
         Route::get('cupRates', 'CupRateController@cupRates')->name('cupRates');
         Route::get('me', 'AuthController@me');
+        
+        // Payment routes
+        Route::post('phonepe-pay', 'PaymentController@phonepePay');
+        Route::get('phonepe-status', 'PaymentController@phonepeStatus');
+        Route::post('razorpay/create-order', 'PaymentController@createOrder');
+        Route::post('razorpay/capture-payment', 'PaymentController@capturePayment');
+        Route::post('webhook/razorpay', 'PaymentController@handleWebhook');
+        
         Route::get('/test', function () {
             return response('Test API', 200)->header('Content-Type', 'application/json');
         });
         
         // Send message route
         Route::post('sendMessage', 'ContactController@sendMessage');
-        
-        // Payment routes
-        Route::post('phonepe-pay', 'PaymentController@phonepePay');
-        Route::post('razorpay/create-order', 'PaymentController@createOrder');
-        Route::post('razorpay/capture-payment', 'PaymentController@capturePayment');
-        Route::post('webhook/razorpay', 'PaymentController@handleWebhook');
     });
 
     Route::get('/test', function () {
