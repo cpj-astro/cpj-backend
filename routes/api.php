@@ -118,6 +118,7 @@ Route::group(['prefix' => 'v1/cricketpanditji'], function(){
     Route::get('news', 'NewsController@getNews')->name('news');
     Route::post('news', 'NewsController@getNewsDetail')->name('news.post');
     Route::post('commentary', 'MatchController@commentary')->name('commentary');
+    Route::post('scorecardByMatchId', 'MatchController@scorecard')->name('scorecard');
 
     // After login endpoints
     Route::middleware(['auth:sanctum'])->group(function () {
@@ -130,7 +131,6 @@ Route::group(['prefix' => 'v1/cricketpanditji'], function(){
         Route::get('liveMatches', 'MatchController@getLiveList')->name('liveMatches');
         Route::get('dashboardMatches', 'MatchController@dashboardList')->name('dashboardMatches');
         Route::post('matchesBySeriesId', 'MatchController@getList');
-        Route::post('scorecardByMatchId', 'MatchController@scorecard')->name('scorecard');
         Route::post('matchOddHistory', 'MatchController@getOddHistory')->name('matchOddHistory');
         Route::post('matchInfo', 'MatchController@matchInfo')->name('matchInfo');
         Route::post('squadByMatchId', 'MatchController@squadByMatchId')->name('squadByMatchId');
@@ -145,6 +145,7 @@ Route::group(['prefix' => 'v1/cricketpanditji'], function(){
         Route::post('sendMessage', 'ContactController@sendMessage');
         
         // Payment routes
+        Route::post('phonepe-pay', 'PaymentController@phonepePay');
         Route::post('razorpay/create-order', 'PaymentController@createOrder');
         Route::post('razorpay/capture-payment', 'PaymentController@capturePayment');
         Route::post('webhook/razorpay', 'PaymentController@handleWebhook');

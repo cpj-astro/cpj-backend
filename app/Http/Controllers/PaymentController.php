@@ -10,9 +10,71 @@ use Illuminate\Support\Facades\DB;
 use App\Models\Payment;
 use App\Models\MatchAstrology;
 use App\Models\AstrologyData;
+use App\Traits\CommonTraits;
 
 class PaymentController extends Controller
 {
+    use CommonTraits;
+    public function phonepePay(Request $request) {
+        try {
+            $saltKey = '07afb8d3-ec97-49c3-9ff0-f7b73942c08f';
+            $data = $request->all();
+            $payloadMain = base64_encode(json_encode($data));
+
+            $payload = $payloadMain."/pg/v1/pay".$saltKey;
+            $Checksum = hash('sha256', $payload);
+            $Checksum = $Checksum.'###1';
+
+            $curl = curl_init();
+    
+            curl_setopt_array($curl, array(
+                CURLOPT_URL => 'https://api.phonepe.com/apis/hermes/pg/v1/pay',
+                CURLOPT_RETURNTRANSFER => true,
+                CURLOPT_ENCODING => '',
+                CURLOPT_MAXREDIRS => 10,
+                CURLOPT_TIMEOUT => 30,
+                CURLOPT_FOLLOWLOCATION => true,
+                CURLOPT_SSL_VERIFYHOST => false,
+                CURLOPT_SSL_VERIFYPEER => false,
+                CURLOPT_HTTP_VERSION => CURL_HTTP_VERSION_1_1,
+                CURLOPT_CUSTOMREQUEST => 'POST',
+                CURLOPT_POSTFIELDS => json_encode([
+                    'request' => $payloadMain
+                ]),
+                CURLOPT_HTTPHEADER => [
+                    "Content-Type: application/json",
+                    "X-VERIFY: ".$Checksum,
+                    "accept: application/json"
+                ],
+            ));
+    
+            $response = curl_exec($curl);
+    
+            if (curl_errno($curl)) {     
+                $error_msg = curl_error($curl); 
+                Log::info($error_msg);
+            } 
+            
+            curl_close($curl);
+
+            $responseData = json_decode($response, true);
+            $url = null;
+
+            if($responseData) {
+                $url = $responseData['data']['instrumentResponse']['redirectInfo']['url'];
+            }
+
+            return response()->json(['status' => true, 'url' => $url ,'Credentials Verified! Moving for payment'], 200);
+        } catch (\Throwable $th) {
+            $this->captureExceptionLog($th);
+            return response()->json([
+                'data' => [],
+                'success' => false,
+                'msg' => $th->getMessage()
+            ], 200);
+        }
+    }
+
     public function createOrder(Request $request)
     {
         $api = new Api(env('RAZORPAY_KEY'), env('RAZORPAY_SECRET'));
@@ -57,6 +119,11 @@ class PaymentController extends Controller
                 'amount' => $request->post('amount'),
                 'status' => 'success'
             ]);
+
+
+
+
+
 
             // if payment successful then create match astrology
             if($payment->status == 'success') {

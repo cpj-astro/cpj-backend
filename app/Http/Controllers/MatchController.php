@@ -678,10 +678,6 @@ class MatchController extends Controller
                 ];
                 $res = $this->pullData($apiUrl, 'POST', $postData);
 
-                // comment the below before live
-                // $path = public_path() . "/scorecardByMatchId.json";
-                // $res = File::get($path);
-
                 $res = json_decode($res, true);
 
                 if ($res['status']) {
