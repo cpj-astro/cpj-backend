@@ -1046,6 +1046,92 @@ class MatchController extends Controller
         }
     }
     
+    public function matchInfoByMatchId(Request $request)
+    {
+        try {
+            $apiUrl = config('services.cricket-champion.endpoint') . 'matchInfo/' . config('services.cricket-champion.token');
+            $match_id = $request->input('match_id');
+            if (isset($match_id) && !empty($match_id)) {
+                $postData = [
+                    'match_id' => $match_id
+                ];
+                $res = $this->pullData($apiUrl, 'POST', $postData);
+
+                $res = json_decode($res, true);
+
+                if ($res['status']) {
+                    return response()->json([
+                        'data' => $res['data'],
+                        'success' => true,
+                        'msg' => 'Data found'
+                    ], 200);
+                } else {
+                    return response()->json([
+                        'data' => [],
+                        'success' => false,
+                        'msg' => (isset($res['msg']) ? $res['msg'] : 'No match id')
+                    ], 200);
+                }
+            } else {
+                return response()->json([
+                    'data' => [],
+                    'success' => false,
+                    'msg' => 'No match id'
+                ], 200);
+            }
+        } catch (\Throwable $th) {
+            $this->captureExceptionLog($th);
+            return response()->json([
+                'data' => [],
+                'success' => false,
+                'msg' => $th->getMessage()
+            ], 200);
+        }
+    }
+
+    public function playingXiByMatchId(Request $request)
+    {
+        try {
+            $apiUrl = config('services.cricket-champion.endpoint') . 'playingXiByMatchId/' . config('services.cricket-champion.token');
+            $match_id = $request->input('match_id');
+            if (isset($match_id) && !empty($match_id)) {
+                $postData = [
+                    'match_id' => $match_id
+                ];
+                $res = $this->pullData($apiUrl, 'POST', $postData);
+
+                $res = json_decode($res, true);
+
+                if ($res['status']) {
+                    return response()->json([
+                        'data' => $res['data'],
+                        'success' => true,
+                        'msg' => 'Data found'
+                    ], 200);
+                } else {
+                    return response()->json([
+                        'data' => [],
+                        'success' => false,
+                        'msg' => (isset($res['msg']) ? $res['msg'] : 'No match id')
+                    ], 200);
+                }
+            } else {
+                return response()->json([
+                    'data' => [],
+                    'success' => false,
+                    'msg' => 'No match id'
+                ], 200);
+            }
+        } catch (\Throwable $th) {
+            $this->captureExceptionLog($th);
+            return response()->json([
+                'data' => [],
+                'success' => false,
+                'msg' => $th->getMessage()
+            ], 200);
+        }
+    }
+
     public function getOddHistory(Request $request)
     {
         try {
@@ -1056,10 +1142,6 @@ class MatchController extends Controller
                     'match_id' => $match_id
                 ];
                 $res = $this->pullData($apiUrl, 'POST', $postData);
-
-                // comment the below before live
-                // $path = public_path() . "/matchOddHistory.json";
-                // $res = File::get($path);
 
                 $res = json_decode($res, true);
 

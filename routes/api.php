@@ -120,6 +120,8 @@ Route::group(['prefix' => 'v1/cricketpanditji'], function(){
     Route::post('commentary', 'MatchController@commentary')->name('commentary');
     Route::post('scorecardByMatchId', 'MatchController@scorecard')->name('scorecard');
     Route::post('matchOddHistory', 'MatchController@getOddHistory')->name('matchOddHistory');
+    Route::post('matchInfoByMatchId', 'MatchController@matchInfoByMatchId')->name('matchInfoByMatchId');
+    Route::post('playingXiByMatchId', 'MatchController@playingXiByMatchId')->name('playingXiByMatchId');
 
     // After login endpoints
     Route::middleware(['auth:sanctum'])->group(function () {
