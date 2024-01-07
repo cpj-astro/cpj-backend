@@ -66,6 +66,8 @@ class FetchRecentMatches extends Command
                         "result" => (isset($value['result']) && !empty($value['result'])) ? $value['result'] : NULL,
                         "team_a_id" => (isset($value['team_a_id']) && !empty($value['team_a_id'])) ? $value['team_a_id'] : NULL,
                         "team_a" => (isset($value['team_a']) && !empty($value['team_a'])) ? $value['team_a'] : NULL,
+                        "min_rate" => (isset($value['min_rate']) && !empty($value['min_rate'])) ? $value['min_rate'] : NULL,
+                        "max_rate" => (isset($value['max_rate']) && !empty($value['max_rate'])) ? $value['max_rate'] : NULL,
                         "team_a_short" => (isset($value['team_a_short']) && !empty($value['team_a_short'])) ? $value['team_a_short'] : NULL,
                         "team_a_img" => (isset($value['team_a_img']) && !empty($value['team_a_img'])) ? $value['team_a_img'] : NULL,
                         "team_a_scores" => (isset($value['team_a_scores']) && !empty($value['team_a_scores'])) ? $value['team_a_scores'] : NULL,
