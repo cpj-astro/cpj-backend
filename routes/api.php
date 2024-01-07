@@ -122,6 +122,7 @@ Route::group(['prefix' => 'v1/cricketpanditji'], function(){
     Route::post('matchOddHistory', 'MatchController@getOddHistory')->name('matchOddHistory');
     Route::post('matchInfoByMatchId', 'MatchController@matchInfoByMatchId')->name('matchInfoByMatchId');
     Route::post('playingXiByMatchId', 'MatchController@playingXiByMatchId')->name('playingXiByMatchId');
+    Route::post('matchInfo', 'MatchController@matchInfo')->name('matchInfo');
 
     // After login endpoints
     Route::middleware(['auth:sanctum'])->group(function () {
@@ -134,7 +135,6 @@ Route::group(['prefix' => 'v1/cricketpanditji'], function(){
         Route::get('liveMatches', 'MatchController@getLiveList')->name('liveMatches');
         Route::get('dashboardMatches', 'MatchController@dashboardList')->name('dashboardMatches');
         Route::post('matchesBySeriesId', 'MatchController@getList');
-        Route::post('matchInfo', 'MatchController@matchInfo')->name('matchInfo');
         Route::post('squadByMatchId', 'MatchController@squadByMatchId')->name('squadByMatchId');
         Route::post('pointsTable', 'SeriesController@getPointsTable')->name('pointsTable');
         Route::get('cupRates', 'CupRateController@cupRates')->name('cupRates');
