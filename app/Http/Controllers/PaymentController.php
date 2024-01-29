@@ -15,20 +15,32 @@ use App\Traits\CommonTraits;
 class PaymentController extends Controller
 {
     use CommonTraits;
+    private $base_url, $salt_key, $merchant_id, $key_index;
+    public function __construct()
+    {
+        if(config('app.env') == 'production') {
+            $this->base_url = config('services.phonepe.production.base_url');
+            $this->salt_key = config('services.phonepe.production.salt_key');
+            $this->key_index = config('services.phonepe.production.key_index');
+            $this->merchant_id = config('services.phonepe.production.merchant_id');
+        } else {
+            $this->base_url = config('services.phonepe.sandbox.base_url');
+            $this->salt_key = config('services.phonepe.sandbox.salt_key');
+            $this->key_index = config('services.phonepe.sandbox.key_index');
+            $this->merchant_id = config('services.phonepe.sandbox.merchant_id');
+        }
+    }
     public function phonepePay(Request $request) {
         try {
-            $saltKey = '07afb8d3-ec97-49c3-9ff0-f7b73942c08f';
             $data = $request->all();
-            $payloadMain = base64_encode(json_encode($data));
-
-            $payload = $payloadMain."/pg/v1/pay".$saltKey;
-            $Checksum = hash('sha256', $payload);
-            $Checksum = $Checksum.'###1';
+            $payload = base64_encode(json_encode($data));
+            $createChecksum = $payload."/pg/v1/pay".$this->salt_key;
+            $checksum = hash('sha256', $createChecksum);
+            $checksum = $checksum.'###1';
 
             $curl = curl_init();
-    
             curl_setopt_array($curl, array(
-                CURLOPT_URL => 'https://api.phonepe.com/apis/hermes/pg/v1/pay',
+                CURLOPT_URL => $this->base_url.'pay',
                 CURLOPT_RETURNTRANSFER => true,
                 CURLOPT_ENCODING => '',
                 CURLOPT_MAXREDIRS => 10,
@@ -39,11 +51,11 @@ class PaymentController extends Controller
                 CURLOPT_HTTP_VERSION => CURL_HTTP_VERSION_1_1,
                 CURLOPT_CUSTOMREQUEST => 'POST',
                 CURLOPT_POSTFIELDS => json_encode([
-                    'request' => $payloadMain
+                    'request' => $payload
                 ]),
                 CURLOPT_HTTPHEADER => [
                     "Content-Type: application/json",
-                    "X-VERIFY: ".$Checksum,
+                    "X-VERIFY: ".$checksum,
                     "accept: application/json"
                 ],
             ));
@@ -58,9 +70,12 @@ class PaymentController extends Controller
             curl_close($curl);
 
             $responseData = json_decode($response, true);
-            $url = null;
 
-            if($responseData) {
+            \Log::info('$responseData');
+            \Log::info($responseData);
+
+            $url = null;
+            if($responseData && isset($responseData['data']) && isset($responseData['data']['instrumentResponse']) && isset($responseData['data']['instrumentResponse']['redirectInfo']) && isset($responseData['data']['instrumentResponse']['redirectInfo']['url'])) {
                 $url = $responseData['data']['instrumentResponse']['redirectInfo']['url'];
             }
 
@@ -76,19 +91,18 @@ class PaymentController extends Controller
     }
 
     public function phonepeStatus(Request $request) {
+        \Log::info($request);
         try {
-            $saltKey = '07afb8d3-ec97-49c3-9ff0-f7b73942c08f';
             $data = $request->all();
-            $merchantId = $data['merchantId'];
             $transactionId = $data['transactionId'];
-            $payload = "/pg/v1/status/".$merchantId."/".$transactionId."/".$saltKey;
-            $Checksum = hash('sha256', $payload);
-            $Checksum = $Checksum.'###1';
+            $payload = "/pg/v1/status/".$this->merchant_id."/".$transactionId."/".$this->salt_key;
+            $checksum = hash('sha256', $payload);
+            $checksum = $checksum.'###1';
 
             $curl = curl_init();
     
             curl_setopt_array($curl, array(
-                CURLOPT_URL => 'https://api.preprod.phonepe.com/apis/hermes/pg/v1/status/'.$merchantId."/".$transactionId,
+                CURLOPT_URL => $this->base_url.'status/'.$this->merchant_id."/".$transactionId,
                 CURLOPT_RETURNTRANSFER => true,
                 CURLOPT_ENCODING => '',
                 CURLOPT_MAXREDIRS => 10,
@@ -100,8 +114,8 @@ class PaymentController extends Controller
                 CURLOPT_CUSTOMREQUEST => 'GET',
                 CURLOPT_HTTPHEADER => [
                     "Content-Type: application/json",
-                    "X-VERIFY: ".$Checksum,
-                    "X-MERCHANT-ID: ".$merchantId,
+                    "X-VERIFY: ".$checksum,
+                    "X-MERCHANT-ID: ".$this->merchant_id,
                     "accept: application/json"
                 ],
             ));
@@ -120,7 +134,7 @@ class PaymentController extends Controller
             \Log::info("responseStatus");
             \Log::info($responseData);
 
-            return response()->json(['status' => true ,'Credentials Verified! Moving for payment'], 200);
+            return response()->json(['status' => true , $responseData], 200);
         } catch (\Throwable $th) {
             $this->captureExceptionLog($th);
             return response()->json([
@@ -175,11 +189,6 @@ class PaymentController extends Controller
                 'amount' => $request->post('amount'),
                 'status' => 'success'
             ]);
-
-
-
-
-
 
             // if payment successful then create match astrology
             if($payment->status == 'success') {

@@ -124,6 +124,7 @@ Route::group(['prefix' => 'v1/cricketpanditji'], function(){
     Route::post('playingXiByMatchId', 'MatchController@playingXiByMatchId')->name('playingXiByMatchId');
     Route::post('matchInfo', 'MatchController@matchInfo')->name('matchInfo');
 
+    Route::post('phonepe-status', 'PaymentController@phonepeStatus');
     // After login endpoints
     Route::middleware(['auth:sanctum'])->group(function () {
         Route::get('allMatchesOnline', 'MatchController@allMatchesOnline')->name('allMatchesOnline');
@@ -142,7 +143,6 @@ Route::group(['prefix' => 'v1/cricketpanditji'], function(){
         
         // Payment routes
         Route::post('phonepe-pay', 'PaymentController@phonepePay');
-        Route::get('phonepe-status', 'PaymentController@phonepeStatus');
         Route::post('razorpay/create-order', 'PaymentController@createOrder');
         Route::post('razorpay/capture-payment', 'PaymentController@capturePayment');
         Route::post('webhook/razorpay', 'PaymentController@handleWebhook');
