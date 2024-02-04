@@ -71,9 +71,6 @@ class PaymentController extends Controller
 
             $responseData = json_decode($response, true);
 
-            \Log::info('$responseData');
-            \Log::info($responseData);
-
             $url = null;
             if($responseData && isset($responseData['data']) && isset($responseData['data']['instrumentResponse']) && isset($responseData['data']['instrumentResponse']['redirectInfo']) && isset($responseData['data']['instrumentResponse']['redirectInfo']['url'])) {
                 $url = $responseData['data']['instrumentResponse']['redirectInfo']['url'];
@@ -90,19 +87,16 @@ class PaymentController extends Controller
         }
     }
 
-    public function phonepeStatus(Request $request) {
-        \Log::info($request);
+    public function phonepeStatus($transaction_id) {
         try {
-            $data = $request->all();
-            $transactionId = $data['transactionId'];
-            $payload = "/pg/v1/status/".$this->merchant_id."/".$transactionId."/".$this->salt_key;
+            $payload = "/pg/v1/status/".$this->merchant_id."/".$transaction_id.$this->salt_key;
             $checksum = hash('sha256', $payload);
             $checksum = $checksum.'###1';
 
             $curl = curl_init();
     
             curl_setopt_array($curl, array(
-                CURLOPT_URL => $this->base_url.'status/'.$this->merchant_id."/".$transactionId,
+                CURLOPT_URL => $this->base_url.'status/'.$this->merchant_id."/".$transaction_id,
                 CURLOPT_RETURNTRANSFER => true,
                 CURLOPT_ENCODING => '',
                 CURLOPT_MAXREDIRS => 10,
@@ -130,11 +124,13 @@ class PaymentController extends Controller
             curl_close($curl);
 
             $responseData = json_decode($response, true);
-            
-            \Log::info("responseStatus");
-            \Log::info($responseData);
-
-            return response()->json(['status' => true , $responseData], 200);
+            $merchantTransactionId = null;
+            if (isset($responseData['success']) && $responseData['success'] && $responseData['data'] && $responseData['data']['merchantTransactionId']) {
+                $merchantTransactionId = $responseData['data']['merchantTransactionId'];
+                return view('payment-success', compact('merchantTransactionId'));
+            } else {
+                return view('payment-failed', compact('merchantTransactionId'));
+            }
         } catch (\Throwable $th) {
             $this->captureExceptionLog($th);
             return response()->json([
