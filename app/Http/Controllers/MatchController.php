@@ -235,6 +235,9 @@ class MatchController extends Controller
                 DB::raw("CASE WHEN payments.id IS NOT NULL THEN 'View Astrology' ELSE 'Buy Astrology' END as button_text"),
                 DB::raw("CASE WHEN payments.id IS NOT NULL THEN 'theme-button-2' ELSE 'theme-button-3' END as button_class"),
                 'payments.id as payment_id',
+                'payments.transaction_id',
+                'payments.merchant_transaction_id',
+                'payments.payment_instrument',
                 'payments.razorpay_payment_id',
                 'payments.razorpay_order_id',
                 'payments.razorpay_signature',
@@ -245,7 +248,9 @@ class MatchController extends Controller
             )
                 ->leftJoin('payments', function($join) use ($userId) {
                     $join->on('matches.match_id', '=', 'payments.match_id')
-                        ->where('payments.user_id', '=', $userId);
+                        ->where('payments.user_id', '=', $userId)
+                        ->where('payments.status', 'success')
+                        ->whereNotNull('payments.transaction_id');
                 })
                 ->join('series as s', 's.series_id', '=', 'matches.series_id')
                 ->where('match_category', 'live')
@@ -307,6 +312,9 @@ class MatchController extends Controller
                 DB::raw("CASE WHEN payments.id IS NOT NULL THEN 'View Astrology' ELSE 'Buy Astrology' END as button_text"),
                 DB::raw("CASE WHEN payments.id IS NOT NULL THEN 'theme-button-2' ELSE 'theme-button-3' END as button_class"),
                 'payments.id as payment_id',
+                'payments.transaction_id',
+                'payments.merchant_transaction_id',
+                'payments.payment_instrument',
                 'payments.razorpay_payment_id',
                 'payments.razorpay_order_id',
                 'payments.razorpay_signature',
@@ -316,9 +324,11 @@ class MatchController extends Controller
                 'payments.updated_at as payment_updated'
             )
             ->leftJoin('payments', function($join) use ($userId) {
-                $join->on('matches.match_id', '=', 'payments.match_id')
-                ->where('payments.user_id', '=', $userId);
-            })
+                    $join->on('matches.match_id', '=', 'payments.match_id')
+                        ->where('payments.user_id', '=', $userId)
+                        ->where('payments.status', 'success')
+                        ->whereNotNull('payments.transaction_id');
+                })
             ->join('series as s', 's.series_id', '=', 'matches.series_id')
             ->where('match_category', 'upcoming')->orderBy('formatted_date_time_wise', 'asc')->get();
             if (isset($matchesData) && !empty($matchesData) && count($matchesData) > 0) {
@@ -384,6 +394,9 @@ class MatchController extends Controller
                 DB::raw("CASE WHEN payments.id IS NOT NULL THEN 'View Astrology' ELSE 'Buy Astrology' END as button_text"),
                 DB::raw("CASE WHEN payments.id IS NOT NULL THEN 'theme-button-2' ELSE 'theme-button-3' END as button_class"),
                 'payments.id as payment_id',
+                'payments.transaction_id',
+                'payments.merchant_transaction_id',
+                'payments.payment_instrument',
                 'payments.razorpay_payment_id',
                 'payments.razorpay_order_id',
                 'payments.razorpay_signature',
@@ -393,13 +406,15 @@ class MatchController extends Controller
                 'payments.updated_at as payment_updated',
                 'astrology_data'
             )
+            ->leftJoin('payments', function($join) use ($userId) {
+                    $join->on('matches.match_id', '=', 'payments.match_id')
+                        ->where('payments.user_id', '=', $userId)
+                        ->where('payments.status', 'success')
+                        ->whereNotNull('payments.transaction_id');
+                })
                 ->leftJoin('match_astrology', function($join) use ($userId) {
                     $join->on('matches.match_id', '=', 'match_astrology.match_id')
                         ->where('match_astrology.user_id', '=', $userId);
-                })
-                ->leftJoin('payments', function($join) use ($userId) {
-                    $join->on('matches.match_id', '=', 'payments.match_id')
-                        ->where('payments.user_id', '=', $userId);
                 })
                 ->join('series as s', 's.series_id', '=', 'matches.series_id')
                 ->where('match_category', 'live')
@@ -462,6 +477,9 @@ class MatchController extends Controller
                 DB::raw("CASE WHEN payments.id IS NOT NULL THEN 'View Astrology' ELSE 'Buy Astrology' END as button_text"),
                 DB::raw("CASE WHEN payments.id IS NOT NULL THEN 'theme-button-2' ELSE 'theme-button-3' END as button_class"),
                 'payments.id as payment_id',
+                'payments.transaction_id',
+                'payments.merchant_transaction_id',
+                'payments.payment_instrument',
                 'payments.razorpay_payment_id',
                 'payments.razorpay_order_id',
                 'payments.razorpay_signature',
@@ -471,11 +489,13 @@ class MatchController extends Controller
                 'payments.updated_at as payment_updated',
                 'astrology_data'
             )
-            ->join('series as s', 's.series_id', '=', 'matches.series_id')
             ->leftJoin('payments', function($join) use ($userId) {
-                $join->on('matches.match_id', '=', 'payments.match_id')
-                    ->where('payments.user_id', '=', $userId);
-            })
+                    $join->on('matches.match_id', '=', 'payments.match_id')
+                        ->where('payments.user_id', '=', $userId)
+                        ->where('payments.status', 'success')
+                        ->whereNotNull('payments.transaction_id');
+                })
+            ->join('series as s', 's.series_id', '=', 'matches.series_id')
             ->leftJoin('match_astrology', function($join) use ($userId) {
                 $join->on('matches.match_id', '=', 'match_astrology.match_id')
                     ->where('match_astrology.user_id', '=', $userId);
@@ -545,6 +565,9 @@ class MatchController extends Controller
                 DB::raw("CASE WHEN payments.id IS NOT NULL THEN 'View Astrology' ELSE 'Buy Astrology' END as button_text"),
                 DB::raw("CASE WHEN payments.id IS NOT NULL THEN 'theme-button-2' ELSE 'theme-button-3' END as button_class"),
                 'payments.id as payment_id',
+                'payments.transaction_id',
+                'payments.merchant_transaction_id',
+                'payments.payment_instrument',
                 'payments.razorpay_payment_id',
                 'payments.razorpay_order_id',
                 'payments.razorpay_signature',
@@ -554,9 +577,11 @@ class MatchController extends Controller
                 'payments.updated_at as payment_updated'
             )
             ->leftJoin('payments', function($join) use ($userId) {
-                $join->on('matches.match_id', '=', 'payments.match_id')
-                ->where('payments.user_id', '=', $userId);
-            })
+                    $join->on('matches.match_id', '=', 'payments.match_id')
+                        ->where('payments.user_id', '=', $userId)
+                        ->where('payments.status', 'success')
+                        ->whereNotNull('payments.transaction_id');
+                })
             ->leftJoin('series as s', 's.series_id', '=', 'matches.series_id')
             ->where('match_category', 'recent')->orderBy('formatted_date_time_wise', 'desc')->get();
             
@@ -625,6 +650,9 @@ class MatchController extends Controller
                 DB::raw("CASE WHEN payments.id IS NOT NULL THEN 'View Astrology' ELSE 'Buy Astrology' END as button_text"),
                 DB::raw("CASE WHEN payments.id IS NOT NULL THEN 'theme-button-2' ELSE 'theme-button-3' END as button_class"),
                 'payments.id as payment_id',
+                'payments.transaction_id',
+                'payments.merchant_transaction_id',
+                'payments.payment_instrument',
                 'payments.razorpay_payment_id',
                 'payments.razorpay_order_id',
                 'payments.razorpay_signature',
@@ -634,11 +662,13 @@ class MatchController extends Controller
                 'payments.updated_at as payment_updated',
                 'astrology_data'
             )
-            ->leftJoin('series as s', 's.series_id', '=', 'matches.series_id')
+            ->leftJoin('series as s', 's.series_id', '=', 'matches.series_id') 
             ->leftJoin('payments', function($join) use ($userId) {
-                $join->on('matches.match_id', '=', 'payments.match_id')
-                    ->where('payments.user_id', '=', $userId);
-            })
+                    $join->on('matches.match_id', '=', 'payments.match_id')
+                        ->where('payments.user_id', '=', $userId)
+                        ->where('payments.status', 'success')
+                        ->whereNotNull('payments.transaction_id');
+                })
             ->leftJoin('match_astrology', function($join) use ($userId) {
                 $join->on('matches.match_id', '=', 'match_astrology.match_id')
                     ->where('match_astrology.user_id', '=', $userId);
@@ -774,6 +804,9 @@ class MatchController extends Controller
                     DB::raw("STR_TO_DATE(date_wise, '%d %b %Y, %W') as formatted_date_wise"),
                     DB::raw("CONCAT(STR_TO_DATE(date_wise,'%d %b %Y, %W'),' ',STR_TO_DATE(match_time, '%h:%i %p')) as formatted_date_time_wise"),
                     'payments.id as payment_id',
+                    'payments.transaction_id',
+                    'payments.merchant_transaction_id',
+                    'payments.payment_instrument',
                     'payments.razorpay_payment_id',
                     'payments.razorpay_order_id',
                     'payments.razorpay_signature',
@@ -785,7 +818,9 @@ class MatchController extends Controller
                 )
                 ->leftJoin('payments', function($join) use ($userId) {
                     $join->on('matches.match_id', '=', 'payments.match_id')
-                        ->where('payments.user_id', '=', $userId);
+                        ->where('payments.user_id', '=', $userId)
+                        ->where('payments.status', 'success')
+                        ->whereNotNull('payments.transaction_id');
                 })
                 ->leftJoin('match_astrology', function($join) use ($userId) {
                     $join->on('matches.match_id', '=', 'match_astrology.match_id')
@@ -891,6 +926,9 @@ class MatchController extends Controller
                 DB::raw("CASE WHEN payments.id IS NOT NULL THEN 'View Astrology' ELSE 'Buy Astrology' END as button_text"),
                 DB::raw("CASE WHEN payments.id IS NOT NULL THEN 'theme-button-2' ELSE 'theme-button-3' END as button_class"),
                 'payments.id as payment_id',
+                'payments.transaction_id',
+                'payments.merchant_transaction_id',
+                'payments.payment_instrument',
                 'payments.razorpay_payment_id',
                 'payments.razorpay_order_id',
                 'payments.razorpay_signature',
@@ -901,9 +939,11 @@ class MatchController extends Controller
                 'astrology_data'
             )
             ->leftJoin('payments', function($join) use ($userId) {
-                $join->on('matches.match_id', '=', 'payments.match_id')
-                    ->where('payments.user_id', '=', $userId);
-            })
+                    $join->on('matches.match_id', '=', 'payments.match_id')
+                        ->where('payments.user_id', '=', $userId)
+                        ->where('payments.status', 'success')
+                        ->whereNotNull('payments.transaction_id');
+                })
             ->leftJoin('match_astrology', function($join) use ($userId) {
                 $join->on('matches.match_id', '=', 'match_astrology.match_id')
                     ->where('match_astrology.user_id', '=', $userId);
@@ -1001,6 +1041,9 @@ class MatchController extends Controller
                 DB::raw("CASE WHEN payments.id IS NOT NULL THEN 'View Astrology' ELSE 'Buy Astrology' END as button_text"),
                 DB::raw("CASE WHEN payments.id IS NOT NULL THEN 'theme-button-2' ELSE 'theme-button-3' END as button_class"),
                 'payments.id as payment_id',
+                'payments.transaction_id',
+                'payments.merchant_transaction_id',
+                'payments.payment_instrument',
                 'payments.razorpay_payment_id',
                 'payments.razorpay_order_id',
                 'payments.razorpay_signature',
@@ -1011,9 +1054,11 @@ class MatchController extends Controller
                 'astrology_data'
             )
             ->leftJoin('payments', function($join) use ($userId) {
-                $join->on('matches.match_id', '=', 'payments.match_id')
-                    ->where('payments.user_id', '=', $userId);
-            })
+                    $join->on('matches.match_id', '=', 'payments.match_id')
+                        ->where('payments.user_id', '=', $userId)
+                        ->where('payments.status', 'success')
+                        ->whereNotNull('payments.transaction_id');
+                })
             ->leftJoin('match_astrology', function($join) use ($userId) {
                 $join->on('matches.match_id', '=', 'match_astrology.match_id')
                     ->where('match_astrology.user_id', '=', $userId);

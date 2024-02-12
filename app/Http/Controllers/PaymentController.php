@@ -11,6 +11,8 @@ use App\Models\Payment;
 use App\Models\MatchAstrology;
 use App\Models\AstrologyData;
 use App\Traits\CommonTraits;
+use Illuminate\Support\Facades\Auth;
+use App\Models\Matches;
 
 class PaymentController extends Controller
 {
@@ -30,9 +32,19 @@ class PaymentController extends Controller
             $this->merchant_id = config('services.phonepe.sandbox.merchant_id');
         }
     }
+    
     public function phonepePay(Request $request) {
         try {
             $data = $request->all();
+            $payment = Payment::create([
+                'user_id' => auth()->id(),
+                'match_id' => $data['matchId'],
+                'pandit_id' => $data['panditId'],
+                'merchant_transaction_id' => $data['merchantTransactionId'],
+                'payment_instrument' => json_encode($data['paymentInstrument']),
+                'amount' => $data['amount'] / 100,
+                'status' => 'pending'
+            ]);
             $payload = base64_encode(json_encode($data));
             $createChecksum = $payload."/pg/v1/pay".$this->salt_key;
             $checksum = hash('sha256', $createChecksum);
@@ -87,16 +99,22 @@ class PaymentController extends Controller
         }
     }
 
-    public function phonepeStatus($transaction_id) {
+    public function phonepeStatus($match_id, $merchant_transaction_id) {
         try {
-            $payload = "/pg/v1/status/".$this->merchant_id."/".$transaction_id.$this->salt_key;
+            if(isset($match_id) && isset($merchant_transaction_id)) {
+                $matchStatus = Matches::where('match_id', $match_id)->first();
+                if(!$matchStatus) {
+                    return view('status', compact('match_id', 'merchant_transaction_id'));
+                }
+            }
+            $payload = "/pg/v1/status/".$this->merchant_id."/".$merchant_transaction_id.$this->salt_key;
             $checksum = hash('sha256', $payload);
             $checksum = $checksum.'###1';
 
             $curl = curl_init();
     
             curl_setopt_array($curl, array(
-                CURLOPT_URL => $this->base_url.'status/'.$this->merchant_id."/".$transaction_id,
+                CURLOPT_URL => $this->base_url.'status/'.$this->merchant_id."/".$merchant_transaction_id,
                 CURLOPT_RETURNTRANSFER => true,
                 CURLOPT_ENCODING => '',
                 CURLOPT_MAXREDIRS => 10,
@@ -115,7 +133,7 @@ class PaymentController extends Controller
             ));
     
             $response = curl_exec($curl);
-    
+            
             if (curl_errno($curl)) {     
                 $error_msg = curl_error($curl); 
                 Log::info($error_msg);
@@ -124,12 +142,23 @@ class PaymentController extends Controller
             curl_close($curl);
 
             $responseData = json_decode($response, true);
-            $merchantTransactionId = null;
+            
             if (isset($responseData['success']) && $responseData['success'] && $responseData['data'] && $responseData['data']['merchantTransactionId']) {
-                $merchantTransactionId = $responseData['data']['merchantTransactionId'];
-                return view('payment-success', compact('merchantTransactionId'));
+                $payment = Payment::where('merchant_transaction_id', $merchant_transaction_id)->first();
+                if ($payment) {
+                    $payment->status = 'success';
+                    $payment->transaction_id = $responseData['data']['transactionId'];
+                    $payment->payment_instrument = json_encode($responseData['data']);
+                    $payment->save();
+                }
+                return view('payment-success', compact('match_id', 'merchant_transaction_id'));
             } else {
-                return view('payment-failed', compact('merchantTransactionId'));
+                $payment = Payment::where('merchant_transaction_id', $merchant_transaction_id)->first();
+                if ($payment) {
+                    $payment->status = 'failed';
+                    $payment->save();
+                }
+                return view('payment-failed', compact('match_id', 'merchant_transaction_id'));
             }
         } catch (\Throwable $th) {
             $this->captureExceptionLog($th);
@@ -224,7 +253,6 @@ class PaymentController extends Controller
             
             return response()->json(['msg' => 'Payment Received & Match Astrology Created Successfully', 'success' => true]);
         } catch (SignatureVerificationError $e) {
-            \Log::error('Signature verification failed: ' . $e->getMessage());
             return response()->json(['error' => $e, 'success' => false], 200);
         }
     }

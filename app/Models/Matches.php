@@ -99,6 +99,10 @@ class Matches extends Model
         return $this->hasOne(MatchAstrology::class, 'match_id', 'match_id')->where('user_id', auth()->user()->id);
     }
 
+    public function successPayment() {
+        return $this->hasOne(Payment::class, 'match_id', 'match_id')->where('user_id', auth()->user()->id)->where('status', 'success');
+    }
+
     // public function getTeamAOverAttribute($value)
     // {
     //     return (isset($value) && !empty($value)) ? $value + 0 : $value;

@@ -122,11 +122,12 @@ Route::group(['prefix' => 'v1/cricketpanditji'], function(){
     Route::post('matchOddHistory', 'MatchController@getOddHistory')->name('matchOddHistory');
     Route::post('matchInfoByMatchId', 'MatchController@matchInfoByMatchId')->name('matchInfoByMatchId');
     Route::post('playingXiByMatchId', 'MatchController@playingXiByMatchId')->name('playingXiByMatchId');
-    Route::post('matchInfo', 'MatchController@matchInfo')->name('matchInfo');
-    Route::get('payment-status/{tid}', 'PaymentController@phonepeStatus');
-
+    Route::match(['get', 'post'], 'payment-status/{mid}/{tid}', 'PaymentController@phonepeStatus');
+    
     // After login endpoints
     Route::middleware(['auth:sanctum'])->group(function () {
+        Route::post('generateReport', 'Admin\AstrologyController@generateReport')->name('generateReport');
+        Route::post('matchInfo', 'MatchController@matchInfo')->name('matchInfo');
         Route::get('allMatchesOnline', 'MatchController@allMatchesOnline')->name('allMatchesOnline');
         Route::get('user', 'UserController@getUser');
         Route::get('seriesList', 'SeriesController@getList');

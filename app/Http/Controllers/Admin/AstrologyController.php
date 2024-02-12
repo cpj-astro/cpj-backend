@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Models\AstrologyData;
+use App\Models\MatchAstrology;
 use App\Models\Pandits;
 use Illuminate\Http\Request;
 use App\Traits\CommonTraits;
@@ -10,6 +11,7 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Validator;
 use App\Http\Controllers\Controller;
 use Carbon\Carbon;
+use Illuminate\Support\Facades\Schema;
 
 class AstrologyController extends Controller
 {
@@ -21,26 +23,73 @@ class AstrologyController extends Controller
             $payload = $request->all();
             $panditId = $payload['pandit_id'];
             $matchId = $payload['match_id'];
-            $astrologyData = $payload['astrology_data'][0]; // Assuming there is only one record in astrology_data
-    
-            // Convert keys to lowercase, remove white spaces, and trim values
-            $astrologyData = array_map(function ($value, $key) {
-                return [str_replace(' ', '', strtolower($key)) => is_string($value) ? trim($value) : $value];
-            }, $astrologyData, array_keys($astrologyData));
-    
-            $flattenedAstrologyData = array_merge(...$astrologyData);
-    
-            // Find or create a record based on pandit_id and match_id
-            AstrologyData::updateOrCreate(
-                ['pandit_id' => $panditId, 'match_id' => $matchId],
-                $flattenedAstrologyData
-            );
-    
+            $astrologyData = json_decode($payload['astrology_data'], true);
+
+            // Get the list of table fields
+            $tableFields = Schema::getColumnListing((new AstrologyData())->getTable());
+
+            // Update or create astrology data for each zodiac sign
+            foreach ($astrologyData as $signData) {
+                $sheetName = $signData['sheetName'];
+                $signInfo = json_encode($signData['data']);
+
+                // Check if the sheetName matches any table field
+                if (in_array($sheetName, $tableFields)) {
+                    // Find or create a record based on pandit_id, match_id, and sheetName
+                    AstrologyData::updateOrCreate(
+                        ['pandit_id' => $panditId, 'match_id' => $matchId],
+                        [$sheetName => $signInfo]
+                    );
+                }
+            }
+
             return response(['message' => 'Data uploaded successfully', 'status' => true, 'data' => $astrologyData], 200);
         } catch (\Exception $e) {
+            return response(['error' => 'Internal Server Error', 'status' => false], 500);
+        }
+    }
+
+    public function generateReport(Request $request) {
+        try {
+            $houses = [
+                'aries', 'taurus', 'gemini', 'cancer', 'leo', 'virgo',
+                'libra', 'scorpio', 'sagittarius', 'capricorn', 'aquarius', 'pisces',
+            ];
+            
+            $matchAstrologyCreate = null;
+
+            if ($request->post('moon_sign')) {
+                $moonSign = intval($request->post('moon_sign'));
+                if (in_array($moonSign, range(1, 12))) {
+                    $zodiacSign = $houses[$moonSign - 1];
+                    if ($zodiacSign !== false) {
+                        $fetchAstrologyData = AstrologyData::select($zodiacSign)
+                        ->where('match_id', $request->post('match_id'))
+                        ->first();
+
+                        if($fetchAstrologyData) {
+                            $data = json_decode($fetchAstrologyData, true);
+                            if ($data !== null) {
+                                $firstValue = $data[$zodiacSign];
+                            } else {
+                                $firstValue = "";
+                            }
+                            $matchAstrologyCreate = MatchAstrology::create([
+                                'user_id' => $request->post('user_id'),
+                                'match_id' => $request->post('match_id'),
+                                'astrology_data' => $firstValue
+                            ]); 
+                        }
+                    }
+                }
+            }
+            
+            return response()->json(['msg' => 'Match Astrology Generated Successfully', 'data' => $matchAstrologyCreate, 'success' => true]);
+        } catch (\Exception $e) {
+            // Handle any errors that occur during data processing
             return response(['error' => $e->getMessage(), 'status' => false], 500);
         }
-    }      
+    }
 
     public function uploadAstrology(Request $request)
     {
