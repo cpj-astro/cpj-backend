@@ -142,7 +142,7 @@ class PaymentController extends Controller
             curl_close($curl);
 
             $responseData = json_decode($response, true);
-            \Log::info($responseData);
+            
             if (isset($responseData['success']) && $responseData['success'] && $responseData['data'] && $responseData['data']['merchantTransactionId']) {
                 $payment = Payment::where('merchant_transaction_id', $merchant_transaction_id)->first();
                 if ($payment) {
