@@ -147,7 +147,7 @@ class AuthController extends Controller
     
     public function sendFPLink(Request $request) {
         try {
-            $userExist = User::where('id', $request->id)->first();
+            $userExist = User::where('email', $request->email)->first();
             if($userExist) {
                 $token = Str::random(64);
                 
