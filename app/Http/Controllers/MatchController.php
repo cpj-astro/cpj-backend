@@ -244,13 +244,17 @@ class MatchController extends Controller
                 'payments.amount as payment_amount',
                 'payments.status as payment_status',
                 'payments.created_at as payment_created',
-                'payments.updated_at as payment_updated'
+                'payments.updated_at as payment_updated',
+                'astrology_data'
             )
                 ->leftJoin('payments', function($join) use ($userId) {
                     $join->on('matches.match_id', '=', 'payments.match_id')
                         ->where('payments.user_id', '=', $userId)
                         ->where('payments.status', 'success')
                         ->whereNotNull('payments.transaction_id');
+                })
+                ->leftJoin('match_astrology', function($join) use ($userId) {
+                    $join->on('matches.match_id', '=', 'match_astrology.match_id');
                 })
                 ->join('series as s', 's.series_id', '=', 'matches.series_id')
                 ->where('match_category', 'live')
@@ -321,7 +325,8 @@ class MatchController extends Controller
                 'payments.amount as payment_amount',
                 'payments.status as payment_status',
                 'payments.created_at as payment_created',
-                'payments.updated_at as payment_updated'
+                'payments.updated_at as payment_updated',
+                'astrology_data'
             )
             ->leftJoin('payments', function($join) use ($userId) {
                     $join->on('matches.match_id', '=', 'payments.match_id')
@@ -329,6 +334,9 @@ class MatchController extends Controller
                         ->where('payments.status', 'success')
                         ->whereNotNull('payments.transaction_id');
                 })
+            ->leftJoin('match_astrology', function($join) use ($userId) {
+                $join->on('matches.match_id', '=', 'match_astrology.match_id');
+            })
             ->join('series as s', 's.series_id', '=', 'matches.series_id')
             ->where('match_category', 'upcoming')->orderBy('formatted_date_time_wise', 'asc')->get();
             if (isset($matchesData) && !empty($matchesData) && count($matchesData) > 0) {
@@ -823,8 +831,7 @@ class MatchController extends Controller
                         ->whereNotNull('payments.transaction_id');
                 })
                 ->leftJoin('match_astrology', function($join) use ($userId) {
-                    $join->on('matches.match_id', '=', 'match_astrology.match_id')
-                        ->where('match_astrology.user_id', '=', $userId);
+                    $join->on('matches.match_id', '=', 'match_astrology.match_id');
                 })
                 ->leftJoin('series as s', 's.series_id', '=', 'matches.series_id')
                 ->where('matches.match_id', $match_id)->where('matches.status', 1)->first();
@@ -1067,8 +1074,7 @@ class MatchController extends Controller
                         ->whereNotNull('payments.transaction_id');
                 })
             ->leftJoin('match_astrology', function($join) use ($userId) {
-                $join->on('matches.match_id', '=', 'match_astrology.match_id')
-                    ->where('match_astrology.user_id', '=', $userId);
+                $join->on('matches.match_id', '=', 'match_astrology.match_id');
             })
             ->leftJoin('series as s', 's.series_id', '=', 'matches.series_id')
             ->whereIn('match_category',  ['live', 'upcoming'])
