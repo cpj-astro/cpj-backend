@@ -125,6 +125,7 @@ Route::group(['prefix' => 'v1/cricketpanditji'], function(){
     Route::post('payment-status/{mid}/{tid}', 'PaymentController@phonepeStatus');
     Route::get('payment-status/{mid}/{tid}', 'PaymentController@phonepeStatus');
     // Route::match(['get', 'post'], 'payment-status/{mid}/{tid}', 'PaymentController@phonepeStatus');
+    Route::post('offlineMatchInfo', 'MatchController@offlineMatchInfo')->name('offlineMatchInfo');
     
     // After login endpoints
     Route::middleware(['auth:sanctum'])->group(function () {
