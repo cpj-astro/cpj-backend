@@ -7,7 +7,7 @@ use App\Models\Setting;
 use App\Models\User;
 use App\Models\Kundli;
 use App\Models\PasswordReset;
-use App\Models\MatchAstrology;
+use App\Models\AstrologyData;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Validator;
@@ -46,9 +46,9 @@ class AuthController extends Controller
     {
         try {
             $match_id = $request->input('match_id');
-            $userId = auth()->id();
-            if (isset($match_id) && !empty($match_id) && !empty($userId) && isset($userId)) {
-                $astrologyData = MatchAstrology::where('match_id', $match_id)->where('user_id', $userId)->first();
+            
+            if (isset($match_id) && !empty($match_id)) {
+                $astrologyData = AstrologyData::where('match_id', $match_id)->first();
                 
                 if ($astrologyData) {
                     return response()->json([
