@@ -124,13 +124,13 @@ Route::group(['prefix' => 'v1/cricketpanditji'], function(){
     Route::post('playingXiByMatchId', 'MatchController@playingXiByMatchId')->name('playingXiByMatchId');
     Route::post('payment-status/{mid}/{tid}', 'PaymentController@phonepeStatus');
     Route::get('payment-status/{mid}/{tid}', 'PaymentController@phonepeStatus');
-    Route::post('matchInfo', 'MatchController@matchInfo')->name('matchInfo');
     // Route::match(['get', 'post'], 'payment-status/{mid}/{tid}', 'PaymentController@phonepeStatus');
     
     // After login endpoints
     Route::middleware(['auth:sanctum'])->group(function () {
         Route::post('generateReport', 'Admin\AstrologyController@generateReport')->name('generateReport');
         Route::get('allMatchesOnline', 'MatchController@allMatchesOnline')->name('allMatchesOnline');
+        Route::post('matchInfo', 'MatchController@matchInfo')->name('matchInfo');
         Route::get('user', 'UserController@getUser');
         Route::get('seriesList', 'SeriesController@getList');
         Route::get('pandits', 'PanditController@getAllPandits');

@@ -170,6 +170,7 @@ class MatchController extends Controller
                 'match_date',
                 'match_time',
                 'matchs',
+                'astrology_status',
                 'venue',
                 'match_type',
                 'min_rate',
