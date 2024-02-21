@@ -152,6 +152,7 @@ class AuthController extends Controller
                 $token = Str::random(64);
                 
                 $verificationLink = env('EMAIL_URL') . 'reset-password/' . $token;
+                return response()->json(['status' => true, 'message' => 'We have e-mailed your password reset link!'], 200);
     
                 Mail::send('emails.forgetPassword', ['verificationLink' => $verificationLink], function($message) use($request) {
                     $message->from('cricketpanditji.astro@gmail.com', 'CricketPanditJi'); 
@@ -168,7 +169,6 @@ class AuthController extends Controller
                     ]
                 );
     
-                return response()->json(['status' => true, 'message' => 'We have e-mailed your password reset link!'], 200);
             } else {
                 return response()->json([
                     'data' => [],
