@@ -102,6 +102,7 @@ Route::group(['prefix' => 'v1/cricketpanditji'], function(){
     // Before login endpoint (open endpoints)
     Route::post('sign-in', 'AuthController@signIn')->name('signIn');
     Route::post('sign-up', 'AuthController@signUp')->name('signUp');
+    Route::post('checkAstrology', 'AuthController@checkAstrology')->name('checkAstrology');
     Route::post('forget-password', 'AuthController@sendFPLink')->name('sendFPLink');
     Route::post('reset-password', 'AuthController@resetPassword')->name('resetPassword');
     Route::get('allMatchesOffline', 'MatchController@allMatchesOffline')->name('allMatchesOffline');

@@ -7,6 +7,7 @@ use App\Models\Setting;
 use App\Models\User;
 use App\Models\Kundli;
 use App\Models\PasswordReset;
+use App\Models\AstrologyData;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Validator;
@@ -40,6 +41,39 @@ class AuthController extends Controller
         }
     }
 
+
+    public function checkAstrology(Request $request)
+    {
+        try {
+            $match_id = $request->input('match_id');
+            if (isset($match_id) && !empty($match_id)) {
+                $astrologyData = AstrologyData::where('match_id', $match_id)->first();
+                
+                if ($astrologyData) {
+                    return response()->json([
+                        'success' => true,
+                        'msg' => 'Astrology Data found'
+                    ], 200);
+                } else {
+                    return response()->json([
+                        'success' => false,
+                        'msg' => 'No Astrology data found for the specified match id'
+                    ], 200);
+                }
+            } else {
+                return response()->json([
+                    'success' => false,
+                    'msg' => 'No match id found'
+                ], 200);
+            }
+        } catch (\Throwable $th) {
+            $this->captureExceptionLog($th);
+            return response()->json([
+                'success' => false,
+                'msg' => $th->getMessage()
+            ], 200);
+        }
+    }
 
     public function signUp(Request $request)
     {
