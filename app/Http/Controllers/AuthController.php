@@ -147,26 +147,35 @@ class AuthController extends Controller
     
     public function sendFPLink(Request $request) {
         try {
-            $token = Str::random(64);
-            
-            $verificationLink = env('EMAIL_URL') . 'reset-password/' . $token;
-
-            Mail::send('emails.forgetPassword', ['verificationLink' => $verificationLink], function($message) use($request) {
-                $message->from('cricketpanditji.astro@gmail.com', 'CricketPanditJi'); 
-                $message->to($request->email);
-                $message->subject('Reset Password');
-            });
-
-            DB::table('password_resets')
-            ->updateOrInsert(
-                ['email' => $request->email],
-                [
-                    'token' => $token,
-                    'created_at' => now(),
-                ]
-            );
-
-            return response()->json(['status' => true, 'message' => 'We have e-mailed your password reset link!'], 200);
+            $userExist = User::where('id', $request->id)->first();
+            if($userExist) {
+                $token = Str::random(64);
+                
+                $verificationLink = env('EMAIL_URL') . 'reset-password/' . $token;
+    
+                Mail::send('emails.forgetPassword', ['verificationLink' => $verificationLink], function($message) use($request) {
+                    $message->from('cricketpanditji.astro@gmail.com', 'CricketPanditJi'); 
+                    $message->to($request->email);
+                    $message->subject('Reset Password');
+                });
+    
+                DB::table('password_resets')
+                ->updateOrInsert(
+                    ['email' => $request->email],
+                    [
+                        'token' => $token,
+                        'created_at' => now(),
+                    ]
+                );
+    
+                return response()->json(['status' => true, 'message' => 'We have e-mailed your password reset link!'], 200);
+            } else {
+                return response()->json([
+                    'data' => [],
+                    'status' => false,
+                    'message' => 'User not found!'
+                ], 200);
+            }
         } catch (\Throwable $th) {
             $this->captureExceptionLog($th);
             return response()->json([
@@ -190,7 +199,16 @@ class AuthController extends Controller
             $user = DB::table('password_resets')->where(['token' => $request->token])->first();
             
             if($user) {
-                User::where('email', $user->email)->update(['password' => Hash::make($request->new_password)]);
+                $userExist = User::where('email', $user->email)->first();
+                if($userExist) {
+                    User::where('email', $user->email)->update(['password' => Hash::make($request->new_password)]);
+                } else {
+                    return response()->json([
+                        'data' => [],
+                        'status' => false,
+                        'message' => 'Reset Password Failed! Try again later.'
+                    ], 200);
+                }
             }
 
             DB::table('password_resets')->where(['token'=> $request->token])->delete();
