@@ -79,7 +79,11 @@ class AuthController extends Controller
     public function signUp(Request $request)
     {
         try {
-            
+            $checkUser = User::where('email', '=', $request->input('email'));
+
+            if($checkUser) {
+                return response()->json(['status' => false, 'message' => 'This email already exist!'], 200);
+            }
             // Create a new user
             $user = User::create([
                 'first_name' => $request->input('first_name'),
