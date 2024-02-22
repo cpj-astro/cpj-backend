@@ -127,6 +127,7 @@ Route::group(['prefix' => 'v1/cricketpanditji'], function(){
     Route::get('payment-status/{mid}/{tid}', 'PaymentController@phonepeStatus');
     // Route::match(['get', 'post'], 'payment-status/{mid}/{tid}', 'PaymentController@phonepeStatus');
     Route::post('offlineMatchInfo', 'MatchController@offlineMatchInfo')->name('offlineMatchInfo');
+    Route::get('pandits', 'PanditController@getAllPandits');
     
     // After login endpoints
     Route::middleware(['auth:sanctum'])->group(function () {
@@ -135,7 +136,6 @@ Route::group(['prefix' => 'v1/cricketpanditji'], function(){
         Route::post('matchInfo', 'MatchController@matchInfo')->name('matchInfo');
         Route::get('user', 'UserController@getUser');
         Route::get('seriesList', 'SeriesController@getList');
-        Route::get('pandits', 'PanditController@getAllPandits');
         Route::get('upcomingMatches', 'MatchController@getUpcomingList')->name('upcomingMatches');
         Route::get('recentMatches', 'MatchController@getRecentList')->name('recentMatches');
         Route::get('liveMatches', 'MatchController@getLiveList')->name('liveMatches');
