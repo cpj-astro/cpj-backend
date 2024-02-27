@@ -85,6 +85,10 @@ Route::group(['prefix' => 'v1/admin'], function(){
             Route::get('getPanditById/{id}', 'Admin\PanditController@getPanditById');
             Route::get('getAllPandits', 'Admin\PanditController@getAllPandits'); 
         });
+
+        // Asked Question routes
+        Route::get('asked-questions', 'Admin\AdminController@getAllAskedQues'); 
+        Route::post('updateQuestionStatus', 'Admin\AdminController@updateQuestionStatus')->name('updateQuestionStatus');
         
         // Users routes
         Route::post('users/create-token/{user_id}', 'UserController@createToken');
@@ -131,6 +135,7 @@ Route::group(['prefix' => 'v1/cricketpanditji'], function(){
     
     // After login endpoints
     Route::middleware(['auth:sanctum'])->group(function () {
+        Route::post('submit-question', 'UserController@submitQuestion');
         Route::post('generateReport', 'Admin\AstrologyController@generateReport')->name('generateReport');
         Route::get('allMatchesOnline', 'MatchController@allMatchesOnline')->name('allMatchesOnline');
         Route::post('matchInfo', 'MatchController@matchInfo')->name('matchInfo');

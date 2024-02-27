@@ -9,6 +9,7 @@ use App\Models\Series;
 use App\Models\Reviews;
 use App\Models\GameJob;
 use App\Models\Visitors;
+use App\Models\AskQuestion;
 use App\Models\Setting;
 use Illuminate\Http\Request;
 use App\Traits\CommonTraits;
@@ -717,4 +718,69 @@ class AdminController extends Controller
         }
     }
 
+    public function getAllAskedQues(){
+        try {
+            $data = AskQuestion::get();
+            if ($data) {
+                return response()->json([
+                    'data' => $data,
+                    'success' => true,
+                    'msg' => 'Data found'
+                ], 200);
+            }
+            return response()->json([
+                'data' => [],
+                'success' => false,
+                'msg' => 'No data found'
+            ], 200);
+        } catch (\Throwable $th) {
+            //throw $th;
+            $this->captureExceptionLog($th);
+            return response()->json([
+                'data' => [],
+                'success' => false,
+                'msg' => $th->getMessage()
+            ], 200);
+        }
+    }
+
+    public function updateQuestionStatus(Request $request)
+    {
+        try {
+            $input = $request->all();
+            \Log::info('Request',  $input);
+            if (isset($input['id']) && !empty($input['id'])) {
+                $id = $input['id'];
+                $status = $input['status'];
+                $data = AskQuestion::where('id', $id)->update('status', !$status);
+                
+                if ($data) {
+                    return response()->json([
+                        'data' => [],
+                        'success' => true,
+                        'msg' => 'Data updated successfully'
+                    ], 200);
+                } else {
+                    return response()->json([
+                        'data' => [],
+                        'success' => false,
+                        'msg' => 'Cannot update data'
+                    ], 200);
+                }
+            } else {
+                return response()->json([
+                    'data' => [],
+                    'success' => false,
+                    'msg' => 'No question available'
+                ], 200);
+            }
+        } catch (\Throwable $th) {
+            $this->captureExceptionLog($th);
+            return response()->json([
+                'data' => [],
+                'success' => false,
+                'msg' => $th->getMessage()
+            ], 200);
+        }
+    }
 }

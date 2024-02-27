@@ -10,6 +10,7 @@ use App\Models\OnlineVisitors;
 use App\Models\Visitors;
 use App\Models\Reviews;
 use App\Models\MatchAstrology;
+use App\Models\AskQuestion;
 use App\Models\UserApiRequest;
 use Illuminate\Http\Request;
 use App\Traits\CommonTraits;
@@ -549,6 +550,27 @@ class UserController extends Controller
             ], 200);
         }
     }
+
+    public function submitQuestion(Request $request) {
+        try {
+            $user = Auth::user();
+            
+            // Create a new question
+            $question = AskQuestion::create([
+                'user_id' => $user->id,
+                'wtsp_number' => $request->input('wtsp_number'),
+                'question' => $request->input('question'),
+                'is_wtsp_number' => false,
+                'status' => true, 
+            ]);
+    
+            // You can return the created question or a success message as per your API design
+            return response()->json(['status' => true,'message' => 'Question submitted successfully. Check in your Profile!'], 200);
+        } catch (\Exception $e) {
+            // Handle other exceptions
+            return response()->json(['message' => $e->getMessage()], 200);
+        }
+    }    
 
     public function submitFeedback(Request $request) {
         try {
