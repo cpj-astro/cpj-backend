@@ -788,7 +788,6 @@ class AdminController extends Controller
     {
         try {
             $input = $request->all();
-            \Log::info('Request',  $input);
             if (isset($input['id']) && !empty($input['id'])) {
                 $id = $input['id'];
                 $answer = $input['answer'];
