@@ -66,8 +66,7 @@
         <h1>Failed</h1> 
         @if($match_id && $merchant_transaction_id)
             @php
-                $baseUrl = env('APP_ENV') === 'local' ? env('CPJ_LOCAL_URL') : env('CPJ_DEV_URL');
-                $matchDetailsUrl = $baseUrl . 'match-reports/' . $match_id;
+                $matchDetailsUrl = 'https://cricketpanditji.com/' . 'match-reports/' . $match_id;
             @endphp
             <p>Transaction ID: $merchant_transaction_id</p>
             <p>Trasaction failed!, Try again after sometime <a href="{{ $matchDetailsUrl }}">click here</a></p>

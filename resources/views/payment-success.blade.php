@@ -65,8 +65,7 @@
         <h1>Payment Success</h1> 
         @if($match_id && $merchant_transaction_id)
             @php
-                $baseUrl = env('APP_ENV') === 'local' ? env('CPJ_LOCAL_URL') : env('CPJ_DEV_URL');
-                $matchDetailsUrl = $baseUrl . 'match-reports/' . $match_id;
+                $matchDetailsUrl = 'https://cricketpanditji.com/' . 'match-reports/' . $match_id;
             @endphp
             <p style="font-size: 14px">Transaction ID: <br/>{{ $merchant_transaction_id }}</p>
             <p>Click here to go back and generate match report <a href="{{ $matchDetailsUrl }}">click here</a></p>
