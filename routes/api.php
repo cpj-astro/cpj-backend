@@ -89,6 +89,7 @@ Route::group(['prefix' => 'v1/admin'], function(){
         // Asked Question routes
         Route::get('asked-questions', 'Admin\AdminController@getAllAskedQues'); 
         Route::post('updateQuestionStatus', 'Admin\AdminController@updateQuestionStatus')->name('updateQuestionStatus');
+        Route::post('sumbitAnswer', 'Admin\AdminController@sumbitAnswer')->name('sumbitAnswer');
         
         // Users routes
         Route::post('users/create-token/{user_id}', 'UserController@createToken');

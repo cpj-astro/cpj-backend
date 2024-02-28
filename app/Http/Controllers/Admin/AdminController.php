@@ -752,7 +752,47 @@ class AdminController extends Controller
             if (isset($input['id']) && !empty($input['id'])) {
                 $id = $input['id'];
                 $status = $input['status'];
-                $data = AskQuestion::where('id', $id)->update('status', !$status);
+                $data = AskQuestion::where('id', $id)->update(['status' => !$status]);
+                
+                if ($data) {
+                    return response()->json([
+                        'data' => [],
+                        'success' => true,
+                        'msg' => 'Data updated successfully'
+                    ], 200);
+                } else {
+                    return response()->json([
+                        'data' => [],
+                        'success' => false,
+                        'msg' => 'Cannot update data'
+                    ], 200);
+                }
+            } else {
+                return response()->json([
+                    'data' => [],
+                    'success' => false,
+                    'msg' => 'No question available'
+                ], 200);
+            }
+        } catch (\Throwable $th) {
+            $this->captureExceptionLog($th);
+            return response()->json([
+                'data' => [],
+                'success' => false,
+                'msg' => $th->getMessage()
+            ], 200);
+        }
+    }
+
+    public function sumbitAnswer(Request $request)
+    {
+        try {
+            $input = $request->all();
+            \Log::info('Request',  $input);
+            if (isset($input['id']) && !empty($input['id'])) {
+                $id = $input['id'];
+                $answer = $input['answer'];
+                $data = AskQuestion::where('id', $id)->update(['answer' => $answer]);
                 
                 if ($data) {
                     return response()->json([

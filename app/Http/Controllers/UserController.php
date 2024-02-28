@@ -213,6 +213,7 @@ class UserController extends Controller
             $userId = $user->id;
 
             $userPaymentDetails = Payment::with('user', 'match', 'pandit')->where('user_id', $userId)->get();
+            $userQuestions = AskQuestion::where('user_id', $userId)->get();
 
             $kundli_data = json_decode($user->kundli, true);
             $kundli_data = json_decode($kundli_data['kundli_data'], true);
@@ -284,6 +285,7 @@ class UserController extends Controller
             return response()->json([
                 'data' => $user,
                 'payment_details' => $userPaymentDetails,
+                'questions' => $userQuestions,
                 'success' => true
             ]);
         } else {
