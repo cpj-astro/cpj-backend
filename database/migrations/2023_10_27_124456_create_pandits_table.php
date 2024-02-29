@@ -19,7 +19,7 @@ class CreatePanditsTable extends Migration
             $table->string('avatar_image')->nullable();
             $table->text('description')->nullable();
             $table->integer('experience')->nullable(); 
-            $table->integer('rating')->nullable();
+            $table->float('rating')->nullable();
             $table->integer('match_astrology_price')->nullable();
             $table->timestamps(); 
         });
