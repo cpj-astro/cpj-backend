@@ -79,11 +79,11 @@ class AuthController extends Controller
     public function signUp(Request $request)
     {
         try {
-            $checkUser = User::where('email', '=', $request->input('email'));
+            $checkUser = User::where('email', $request->input('email'));
 
-            if($checkUser) {
+            if(isset($checkUser->email)) {
                 return response()->json(['status' => false, 'message' => 'This email already exist!'], 200);
-            }
+            } 
             // Create a new user
             $user = User::create([
                 'first_name' => $request->input('first_name'),
@@ -187,7 +187,7 @@ class AuthController extends Controller
     public function sendFPLink(Request $request) {
         try {
             $userExist = User::where('email', $request->email)->first();
-            if($userExist) {
+            if($userExist->email) {
                 $token = Str::random(64);
                 
                 $verificationLink = env('EMAIL_URL') . 'reset-password/' . $token;
