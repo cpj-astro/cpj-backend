@@ -37,6 +37,15 @@ return [
     
     'fcm_notification_token' => env('FCM_NOTIFICATION_TOKEN'),
     
+    'node' => [
+        'production' => [
+            'base_url' => env('NODE_PROD_ENDPOINT'),
+        ],
+        'sandbox' => [
+            'base_url' => env('NODE_SANDBOX_ENDPOINT'),
+        ]
+    ],
+
     'phonepe' => [
         'production' => [
             'base_url' => env('PHONEPE_PROD_ENDPOINT'),

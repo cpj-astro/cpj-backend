@@ -21,11 +21,13 @@ class PaymentController extends Controller
     public function __construct()
     {
         if(config('app.env') == 'production') {
+            $this->node_url = config('services.node.production.base_url');
             $this->base_url = config('services.phonepe.production.base_url');
             $this->salt_key = config('services.phonepe.production.salt_key');
             $this->key_index = config('services.phonepe.production.key_index');
             $this->merchant_id = config('services.phonepe.production.merchant_id');
         } else {
+            $this->node_url = config('services.node.sandbox.base_url');
             $this->base_url = config('services.phonepe.sandbox.base_url');
             $this->salt_key = config('services.phonepe.sandbox.salt_key');
             $this->key_index = config('services.phonepe.sandbox.key_index');
@@ -99,7 +101,7 @@ class PaymentController extends Controller
         }
     }
 
-    public function phonepeStatus($match_id, $merchant_transaction_id) {
+    public function phonepeStatus($match_id, $user_id, $merchant_transaction_id) {
         try {
             if(isset($match_id) && isset($merchant_transaction_id)) {
                 $matchStatus = Matches::where('match_id', $match_id)->first();
@@ -150,6 +152,24 @@ class PaymentController extends Controller
                     $payment->transaction_id = $responseData['data']['transactionId'];
                     $payment->payment_instrument = json_encode($responseData['data']);
                     $payment->save();
+
+                    $curl = curl_init();
+                    curl_setopt_array($curl, array(
+                        CURLOPT_URL => $this->node_url.'subscribe-match',
+                        CURLOPT_RETURNTRANSFER => true,
+                        CURLOPT_ENCODING => '',
+                        CURLOPT_MAXREDIRS => 10,
+                        CURLOPT_TIMEOUT => 0,
+                        CURLOPT_FOLLOWLOCATION => true,
+                        CURLOPT_HTTP_VERSION => CURL_HTTP_VERSION_1_1,
+                        CURLOPT_CUSTOMREQUEST => 'POST',
+                        CURLOPT_POSTFIELDS => 'match_id='.$match_id.'&user_id='.$user_id,
+                        CURLOPT_HTTPHEADER => array(
+                            'Content-Type: application/x-www-form-urlencoded'
+                        ),
+                    ));
+                    $response = curl_exec($curl);
+                    curl_close($curl);
                 }
                 return view('payment-success', compact('match_id', 'merchant_transaction_id'));
             } else {
