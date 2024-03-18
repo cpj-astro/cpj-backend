@@ -212,8 +212,14 @@ class UserController extends Controller
 
             $userId = $user->id;
 
-            $userPaymentDetails = Payment::with('user', 'match', 'pandit')->where('user_id', $userId)->get();
-            $userQuestions = AskQuestion::where('user_id', $userId)->get();
+            $userPaymentDetails = Payment::with('user', 'match', 'pandit')
+                ->where('user_id', $userId)
+                ->orderBy('created_at', 'desc') // Order payments by creation date in descending order (newest to oldest)
+                ->get();
+
+            $userQuestions = AskQuestion::where('user_id', $userId)
+                ->orderBy('created_at', 'desc') // Order questions by creation date in descending order (newest to oldest)
+                ->get();
 
             $kundli_data = json_decode($user->kundli, true);
             $kundli_data = json_decode($kundli_data['kundli_data'], true);
