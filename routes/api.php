@@ -117,6 +117,7 @@ Route::group(['prefix' => 'v1/cricketpanditji'], function(){
     Route::get('getGameZop', 'UserController@getGameZop')->name('getGameZop');
     Route::get('getAllPrivateAds', 'PrivateAdsController@getAllPrivateAds')->name('getAllPrivateAds');
     Route::post('setOnlineVisitors', 'UserController@setOnlineVisitors');
+    Route::get('offlineAstroMatches', 'MatchController@offlineAstroMatches')->name('offlineAstroMatches');
     Route::get('offlineUpcomingMatches', 'MatchController@offlineUpcomingMatches')->name('offlineUpcomingMatches');
     Route::get('offlineRecentMatches', 'MatchController@offlineRecentMatches')->name('offlineRecentMatches');
     Route::get('offlineLiveMatches', 'MatchController@offlineLiveMatches')->name('offlineLiveMatches');
@@ -142,6 +143,7 @@ Route::group(['prefix' => 'v1/cricketpanditji'], function(){
         Route::post('matchInfo', 'MatchController@matchInfo')->name('matchInfo');
         Route::get('user', 'UserController@getUser');
         Route::get('seriesList', 'SeriesController@getList');
+        Route::get('astroMatches', 'MatchController@astroMatches')->name('astroMatches');
         Route::get('upcomingMatches', 'MatchController@getUpcomingList')->name('upcomingMatches');
         Route::get('recentMatches', 'MatchController@getRecentList')->name('recentMatches');
         Route::get('liveMatches', 'MatchController@getLiveList')->name('liveMatches');
