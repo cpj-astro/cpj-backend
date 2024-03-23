@@ -57,6 +57,13 @@ Route::group(['prefix' => 'v1/admin'], function(){
         Route::delete('gameJob/{id}', 'Admin\AdminController@deleteGameJob')->name('deleteGameJob');
         Route::post('gameJob/{id}', 'Admin\AdminController@updateGameJob')->name('updateGameJob');
 
+        // GameJobs routes
+        Route::get('getAllGlobalPrices', 'Admin\AdminController@getAllGlobalPrices')->name('getAllGlobalPrices');
+        Route::get('globalPrice/{id}', 'Admin\AdminController@getGlobalPrice')->name('getGlobalPrice');
+        Route::post('globalPrice', 'Admin\AdminController@addGlobalPrice')->name('addGlobalPrice');
+        Route::delete('globalPrice/{id}', 'Admin\AdminController@deleteGlobalPrice')->name('deleteGlobalPrice');
+        Route::post('globalPrice/{id}', 'Admin\AdminController@updateGlobalPrice')->name('updateGlobalPrice');
+
         // Players routes
         Route::get('getPlayersList', 'Admin\PlayersController@getPlayersList');
         Route::post('savePlayer', 'Admin\PlayersController@savePlayer');
@@ -84,6 +91,15 @@ Route::group(['prefix' => 'v1/admin'], function(){
             Route::delete('delete/{id}', 'Admin\PanditController@delete'); 
             Route::get('getPanditById/{id}', 'Admin\PanditController@getPanditById');
             Route::get('getAllPandits', 'Admin\PanditController@getAllPandits'); 
+        });
+
+        //Faq routes
+        Route::prefix('faqs')->group(function () {
+            Route::post('create', 'Admin\FAQController@create'); 
+            Route::put('update/{id}', 'Admin\FAQController@update'); 
+            Route::delete('delete/{id}', 'Admin\FAQController@delete'); 
+            Route::get('getFaqById/{id}', 'Admin\FAQController@getFaqById');
+            Route::get('getAllFaq', 'Admin\FAQController@getAllFaq'); 
         });
 
         // Asked Question routes
@@ -115,6 +131,7 @@ Route::group(['prefix' => 'v1/cricketpanditji'], function(){
     Route::post('submitFeedback', 'UserController@submitFeedback')->name('submitFeedback');
     Route::get('getAllReviews', 'UserController@getAllReviews')->name('getAllReviews');
     Route::get('getGameZop', 'UserController@getGameZop')->name('getGameZop');
+    Route::get('getGPrice', 'UserController@getGPrice')->name('getGPrice');
     Route::get('getAllPrivateAds', 'PrivateAdsController@getAllPrivateAds')->name('getAllPrivateAds');
     Route::post('setOnlineVisitors', 'UserController@setOnlineVisitors');
     Route::get('offlineAstroMatches', 'MatchController@offlineAstroMatches')->name('offlineAstroMatches');

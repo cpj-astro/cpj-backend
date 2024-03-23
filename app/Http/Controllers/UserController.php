@@ -6,6 +6,7 @@ use App\Models\PersonalAccessToken;
 use App\Models\User;
 use App\Models\Payment;
 use App\Models\GameJob;
+use App\Models\GlobalPrice;
 use App\Models\OnlineVisitors;
 use App\Models\Visitors;
 use App\Models\Reviews;
@@ -596,6 +597,22 @@ class UserController extends Controller
         } catch (\Exception $e) {
             // Handle other exceptions
             return response()->json(['message' => 'An error occurred.'], 200);
+        }
+    }
+
+    public function getGPrice()
+    {
+        try {
+            $gPrice = GlobalPrice::where('status', 1)->first();
+
+            if ($gPrice) {
+                return response()->json(['success' => true, 'data' => ['price' => $gPrice->price, 'status' => $gPrice->status]]);
+            } else {
+                return response()->json(['success' => false, 'message' => 'No active price found.']);
+            }
+
+        } catch (\Exception $e) {
+            return response()->json(['success' => false, 'message' => 'An error occurred.', 'error' => $e->getMessage()], 500);
         }
     }
 
