@@ -586,7 +586,7 @@ class MatchController extends Controller
                 $join->on('matches.match_id', '=', 'match_astrology.match_id');
             })
             ->join('series as s', 's.series_id', '=', 'matches.series_id')
-            ->where('astrology_status', 'enable')->orderBy('formatted_date_time_wise', 'asc')->get();
+            ->where('astrology_status', 'enable')->where('matches.match_category', '!=', 'recent')->orderBy('formatted_date_time_wise', 'asc')->get();
             if (isset($matchesData) && !empty($matchesData) && count($matchesData) > 0) {
                 return response()->json([
                     'data' => $matchesData,

@@ -57,7 +57,7 @@ Route::group(['prefix' => 'v1/admin'], function(){
         Route::delete('gameJob/{id}', 'Admin\AdminController@deleteGameJob')->name('deleteGameJob');
         Route::post('gameJob/{id}', 'Admin\AdminController@updateGameJob')->name('updateGameJob');
 
-        // GameJobs routes
+        // GamePrice routes
         Route::get('getAllGlobalPrices', 'Admin\AdminController@getAllGlobalPrices')->name('getAllGlobalPrices');
         Route::get('globalPrice/{id}', 'Admin\AdminController@getGlobalPrice')->name('getGlobalPrice');
         Route::post('globalPrice', 'Admin\AdminController@addGlobalPrice')->name('addGlobalPrice');
@@ -148,6 +148,7 @@ Route::group(['prefix' => 'v1/cricketpanditji'], function(){
     Route::post('playingXiByMatchId', 'MatchController@playingXiByMatchId')->name('playingXiByMatchId');
     Route::post('payment-status/{mid}/{uid}/{tid}', 'PaymentController@phonepeStatus');
     Route::get('payment-status/{mid}/{uid}/{tid}', 'PaymentController@phonepeStatus');
+    Route::get('getAllFaqs', 'Admin\FAQController@getAllFaqs'); 
     // Route::match(['get', 'post'], 'payment-status/{mid}/{tid}', 'PaymentController@phonepeStatus');
     Route::post('offlineMatchInfo', 'MatchController@offlineMatchInfo')->name('offlineMatchInfo');
     Route::get('pandits', 'PanditController@getAllPandits');

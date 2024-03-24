@@ -42,6 +42,16 @@ class FAQController extends Controller
         ], 200);
     }
 
+    public function getAllFaqs()
+    {
+        $faq = Faq::where('status', 1)->get();
+
+        return response()->json([
+            'success' => true,
+            'faqs' => $faq,
+        ], 200);
+    }
+
     // Create a new faq
     public function create(Request $request)
     {
