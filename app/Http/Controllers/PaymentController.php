@@ -8,6 +8,7 @@ use Razorpay\Api\Errors;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use App\Models\Payment;
+use App\Models\User;
 use App\Models\MatchAstrology;
 use App\Models\AstrologyData;
 use App\Traits\CommonTraits;
@@ -148,6 +149,11 @@ class PaymentController extends Controller
             if (isset($responseData['success']) && $responseData['success'] && $responseData['data'] && $responseData['data']['merchantTransactionId']) {
                 $payment = Payment::where('merchant_transaction_id', $merchant_transaction_id)->first();
                 if ($payment) {
+                    $userData = User::where('id', $user_id)->first();
+                    if ($userData) {
+                        $userData->report_counter = $userData->report_counter + 1;
+                        $userData->save();
+                    }
                     $payment->status = 'success';
                     $payment->transaction_id = $responseData['data']['transactionId'];
                     $payment->payment_instrument = json_encode($responseData['data']);

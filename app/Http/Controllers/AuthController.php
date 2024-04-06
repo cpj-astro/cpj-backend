@@ -27,11 +27,30 @@ class AuthController extends Controller
     {
         try {
             // Attempt to log in the user
-            if (auth()->attempt(['email' => $request->email, 'password' => $request->password, 'status' => 1, 'user_type' => 1])) {
+            if (!$request->is_google_success  && auth()->attempt(['email' => $request->email, 'password' => $request->password, 'status' => 1, 'user_type' => 1])) {
                 $user = auth()->user();
                 $token = $user->createToken('client_token', ['client-access'], config('session.lifetime'));
                 // ->plainTextToken; try later with this token method
-                return response(['status' => true, 'message' => 'Login successful', 'user' => $user, 'token' => $token]);
+                return response(['status' => true, 'message' => 'Login successful', 'user' => $user, 'token' => $token,'is_google' => false]);
+            } else if ($request->is_google_success) {
+                // Check if the user already exists
+                $user = User::where('email', $request->email)->first();
+                if (!$user) {
+                    // Create a new user
+                    $user = User::create([
+                        'first_name' => $request->input('first_name'),
+                        'last_name' => $request->input('last_name'),
+                        'email' => $request->input('email'),
+                        'email_verified_at' => Carbon::now()->format('Y-m-d H:i:s'),
+                        'password' => Hash::make(bcrypt(Str::random(16))),
+                        'user_type' => 1,
+                    ]);
+                }
+                // Log in the user
+                auth()->login($user);
+                // Create token
+                $token = $user->createToken('client_token', ['client-access'], config('session.lifetime'));
+                return response(['status' => true, 'message' => 'Login successful', 'user' => $user, 'token' => $token, 'is_google' => true]);
             } else {
                 return response(['status' => false, 'message' => 'Invalid credentials'], 200);
             }

@@ -155,6 +155,7 @@ Route::group(['prefix' => 'v1/cricketpanditji'], function(){
     
     // After login endpoints
     Route::middleware(['auth:sanctum'])->group(function () {
+        Route::post('generate-kundli', 'UserController@generateKundli');
         Route::post('submit-question', 'UserController@submitQuestion');
         Route::post('generateReport', 'Admin\AstrologyController@generateReport')->name('generateReport');
         Route::get('allMatchesOnline', 'MatchController@allMatchesOnline')->name('allMatchesOnline');

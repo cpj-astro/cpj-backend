@@ -46,8 +46,8 @@
     </head>
     <body bgcolor="#d7d7d7" class="generic-template" style="-moz-osx-font-smoothing: grayscale; -webkit-font-smoothing: antialiased; background-color: #d7d7d7; margin: 0; padding: 0;">
     <!-- Header Start -->
-    <div class="bg-white header" bgcolor="#ffffff" style="background-color: white; width: 100%;">
-        <table align="center" bgcolor="#ffffff" style="border-left: 10px solid white; border-right: 10px solid white; max-width: 600px; width: 100%;">
+    <div class="bg-white header" bgcolor="#000000" style="background-color: black; width: 100%;">
+        <table align="center" bgcolor="#000000" style="max-width: 600px; width: 100%;">
             <tr height="80">
                 <td align="center" class="vertical-align-middle" style="color: #464646; font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; font-size: 14px; line-height: 16px; vertical-align: middle;">
                     <a href="https://www.go.com.mt/" target="_blank" style="-webkit-text-decoration-color: #F16522; color: #F16522; text-decoration: none; text-decoration-color: #F16522;">

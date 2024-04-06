@@ -12,6 +12,7 @@ use App\Models\Visitors;
 use App\Models\Reviews;
 use App\Models\MatchAstrology;
 use App\Models\AskQuestion;
+use App\Models\Kundli;
 use App\Models\UserApiRequest;
 use Illuminate\Http\Request;
 use App\Traits\CommonTraits;
@@ -197,6 +198,106 @@ class UserController extends Controller
         }
     }   
 
+    public function generateKundli(Request $request)
+    {
+        try {
+            // Fethch the logged in user
+            $user = Auth::user();
+            
+            $user->update([
+                'birth_date' => $request->input('birth_date'),
+                'birth_time' => $request->input('birth_time'),
+                'birth_place' => $request->input('birth_place'),
+                'latitude' => $request->input('latitude'),
+                'longitude' => $request->input('longitude'),
+                'user_type' => 1
+            ]);
+
+            // Creating date time object
+            $dateObject = strtotime($request->input('birth_date'));
+            $timeObject = strtotime($request->input('birth_time'));
+            
+            // Extracting the year, month, and date from the date & time objects
+            $date = date('d', $dateObject);
+            $month = date('m', $dateObject);
+            $year = date('Y', $dateObject);
+            $hour = date('H', $timeObject);
+            $minute = date('i', $timeObject);
+            
+            if($user) {
+                // Prepare the data array
+                $postData = array(
+                    "year" => intval($year),
+                    "month" => intval($month),
+                    "date" => intval($date),
+                    "hours" => intval($hour),
+                    "minutes" => intval($minute),
+                    "seconds" => 0,
+                    "latitude" => $request->input('latitude'),
+                    "longitude" => $request->input('longitude'),
+                    "timezone" => 5.5,
+                    "settings" => array(
+                        "observation_point" => "topocentric",
+                        "ayanamsha" => "lahiri"
+                    )
+                );
+
+                $postDataJSON = json_encode($postData);
+
+                $curl = curl_init();
+
+                curl_setopt_array($curl, array(
+                    CURLOPT_URL => 'https://json.freeastrologyapi.com/planets',
+                    CURLOPT_RETURNTRANSFER => true,
+                    CURLOPT_ENCODING => '',
+                    CURLOPT_MAXREDIRS => 10,
+                    CURLOPT_TIMEOUT => 0,
+                    CURLOPT_FOLLOWLOCATION => true,
+                    CURLOPT_SSL_VERIFYHOST => false,
+                    CURLOPT_SSL_VERIFYPEER => false,
+                    CURLOPT_HTTP_VERSION => CURL_HTTP_VERSION_1_1,
+                    CURLOPT_CUSTOMREQUEST => 'POST',
+                    CURLOPT_POSTFIELDS => $postDataJSON, // Send the JSON data
+                    CURLOPT_HTTPHEADER => array(
+                        'Content-Type: application/json',
+                        'x-api-key: fPfIcf5yoT2ObLpUGLwt85bZs1XtTFGK573TVK8A'
+                    ),
+                ));
+
+                $response = curl_exec($curl);
+
+                if (curl_errno($curl)) {     
+                    $error_msg = curl_error($curl); 
+                    Log::info($error_msg);
+                } 
+                
+                curl_close($curl);
+
+                $kundliRecord = Kundli::where('user_id', $user->id)->first();
+                $newKundliRecord = null;
+                if ($kundliRecord) {
+                    // Delete the existing kundli record
+                    $kundliRecord->delete();
+                } else {
+                    $newKundliRecord = Kundli::create([
+                        'user_id' => $user->id,
+                        'player_id' => null,
+                        'kundli_data' => $response
+                    ]);
+                }
+            }
+    
+            return response()->json(['status' => true, 'Kundli Created Successfully'], 200);
+        } catch (\Throwable $th) {
+            $this->captureExceptionLog($th);
+            return response()->json([
+                'data' => [],
+                'success' => false,
+                'msg' => $th->getMessage()
+            ], 200);
+        }
+    }
+
     /**
      * Show the form for creating a new resource.
      *
@@ -222,72 +323,74 @@ class UserController extends Controller
                 ->orderBy('created_at', 'desc') // Order questions by creation date in descending order (newest to oldest)
                 ->get();
 
-            $kundli_data = json_decode($user->kundli, true);
-            $kundli_data = json_decode($kundli_data['kundli_data'], true);
-            $planetaryData = $kundli_data['output'][1];
+            if ($user->kundli) {
+                $kundli_data = json_decode($user->kundli, true);
+                $kundli_data = json_decode($kundli_data['kundli_data'], true);
+                $planetaryData = $kundli_data['output'][1];
+        
+                // Create an array to represent the 12 houses, initially filled with null values
+                $houses = array_fill(0, 12, null);
+                $housesDesc = array_fill(0, 12, null);
+                
+                $houseSigns = [
+                    'Aries', 'Taurus', 'Gemini', 'Cancer', 'Leo', 'Virgo', 'Libra', 'Scorpio', 'Sagittarius', 'Capricorn', 'Aquarius', 'Pisces'
+                ];
     
-            // Create an array to represent the 12 houses, initially filled with null values
-            $houses = array_fill(0, 12, null);
-            $housesDesc = array_fill(0, 12, null);
-            
-            $houseSigns = [
-                'Aries', 'Taurus', 'Gemini', 'Cancer', 'Leo', 'Virgo', 'Libra', 'Scorpio', 'Sagittarius', 'Capricorn', 'Aquarius', 'Pisces'
-            ];
-
-            // Iterate through planetary data and map planets to houses
-            foreach ($planetaryData as $planetName => $planetInfo) {
-                $currentSign = $planetInfo['current_sign'];
+                // Iterate through planetary data and map planets to houses
+                foreach ($planetaryData as $planetName => $planetInfo) {
+                    $currentSign = $planetInfo['current_sign'];
+        
+                    // Map the current_sign to the corresponding house number (subtract 1 since arrays are zero-based)
+                    $houseNumber = $currentSign - 1;
+        
+                    // Initialize the house array if it doesn't exist
+                    if (!isset($houses[$houseNumber])) {
+                        $houses[$houseNumber] = [];
+                    }
     
-                // Map the current_sign to the corresponding house number (subtract 1 since arrays are zero-based)
-                $houseNumber = $currentSign - 1;
+                    if (!isset($housesDesc[$houseNumber])) {
+                        $housesDesc[$houseNumber] = [];
+                    }
     
-                // Initialize the house array if it doesn't exist
-                if (!isset($houses[$houseNumber])) {
-                    $houses[$houseNumber] = [];
-                }
-
-                if (!isset($housesDesc[$houseNumber])) {
-                    $housesDesc[$houseNumber] = [];
-                }
-
-                $housesDesc[$houseNumber][] = $planetName;
-                // Add the first 3 letters of the planet's name to the house's array
-                $houses[$houseNumber][] = substr($planetName, 0, 2);
-                if(substr($planetName, 0, 2) == 'Mo') {
-                    $user['moon_sign'] = $currentSign;
-                    $user['sign_name'] = $houseSigns[$currentSign - 1];
-                }
-            }
-    
-            // Convert each house's array into a comma-separated string
-            foreach ($houses as $houseNumber => $houseArray) {
-                if (is_array($houseArray)) {
-                    $houses[$houseNumber] = implode(', ', $houseArray);
-                }
-            }
-    
-            // Iterate through houses and create descriptions
-            $kundli_description = [];
-
-            foreach ($housesDesc as $houseNumber => $planetInfo) {
-                $houseNumber++; // Increment by 1 to match house numbering
-            
-                if ($planetInfo === null) {
-                    $kundli_description[] = "In {$houseNumber} house there are no planets";
-                } else {
-                    if (is_array($planetInfo)) {
-                        $planets = implode(' and ', array_filter($planetInfo, 'is_string'));
-                        $planetCount = count(array_filter($planetInfo, 'is_string'));
-                        $kundli_description[] = "In {$houseNumber} house there " . ($planetCount > 1 ? 'are ' : 'is ') . $planets;
-                    } else {
-                        $kundli_description[] = "In {$houseNumber} house there is {$planetInfo}";
+                    $housesDesc[$houseNumber][] = $planetName;
+                    // Add the first 3 letters of the planet's name to the house's array
+                    $houses[$houseNumber][] = substr($planetName, 0, 2);
+                    if(substr($planetName, 0, 2) == 'Mo') {
+                        $user['moon_sign'] = $currentSign;
+                        $user['sign_name'] = $houseSigns[$currentSign - 1];
                     }
                 }
-            }
-
-            // Add the updated kundli_data and description to the user's data
-            $user['kundli_data'] = $houses;
-            $user['house_details'] = $kundli_description;
+        
+                // Convert each house's array into a comma-separated string
+                foreach ($houses as $houseNumber => $houseArray) {
+                    if (is_array($houseArray)) {
+                        $houses[$houseNumber] = implode(', ', $houseArray);
+                    }
+                }
+        
+                // Iterate through houses and create descriptions
+                $kundli_description = [];
+    
+                foreach ($housesDesc as $houseNumber => $planetInfo) {
+                    $houseNumber++; // Increment by 1 to match house numbering
+                
+                    if ($planetInfo === null) {
+                        $kundli_description[] = "In {$houseNumber} house there are no planets";
+                    } else {
+                        if (is_array($planetInfo)) {
+                            $planets = implode(' and ', array_filter($planetInfo, 'is_string'));
+                            $planetCount = count(array_filter($planetInfo, 'is_string'));
+                            $kundli_description[] = "In {$houseNumber} house there " . ($planetCount > 1 ? 'are ' : 'is ') . $planets;
+                        } else {
+                            $kundli_description[] = "In {$houseNumber} house there is {$planetInfo}";
+                        }
+                    }
+                }
+    
+                // Add the updated kundli_data and description to the user's data
+                $user['kundli_data'] = $houses;
+                $user['house_details'] = $kundli_description;
+            }    
     
             return response()->json([
                 'data' => $user,
